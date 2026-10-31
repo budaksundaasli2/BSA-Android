@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BSA </title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Amaranth:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+</head>
+<body>
+    <div id="editor">
+        <img id="background"/>
+        <div class="gradient top-gradient"></div>
+        <div class="gradient bottom-gradient"></div>
+        <div id="text" contenteditable="true" spellcheck="false">Ketikan<br>Status</div>
+        <img id="logo" src="logo-bsa.png" alt="Logo BSA" />
+    </div>
+
+    <div class="controls">
+        <label for="bgInput">Pilih Gambar Latar Belakang:</label>
+        <div class="upload-row">
+            <input type="file" accept="image/*" id="bgInput" />
+            <div class="camera-actions">
+                <button type="button" id="openCameraBtn">📷 Ambil Foto</button>
+                <input type="file" id="cameraCaptureInput" accept="image/*" capture="environment" hidden>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button id="previewBtn">Preview</button>
+            <button id="saveBtn">Unduh</button>
+        </div>
+    </div>
+
+    <!-- Modal Kamera -->
+    <div id="cameraModal" class="modal camera-modal" aria-hidden="true">
+        <div class="camera-content">
+            <video id="cameraVideo" autoplay playsinline muted></video>
+            <p id="cameraMessage" class="camera-message">Arahkan kamera, lalu ambil foto.</p>
+            <div class="camera-buttons">
+                <button type="button" id="switchCameraBtn">🔄 Ganti Kamera</button>
+                <button type="button" id="capturePhotoBtn">📸 Jepret</button>
+                <button type="button" id="closeCameraBtn">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal untuk Crop -->
+    <div id="cropModal" class="modal">
+        <div class="modal-content">
+            <div id="cropContainer">
+                <img id="cropImage" src="" alt="Gambar untuk di-crop">
+            </div>
+            <div class="crop-buttons">
+                <button id="cropBtn">Crop</button>
+                <button id="cancelCropBtn">Batal</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal untuk Preview -->
+    <div id="previewModal" class="modal">
+        <div class="preview-content">
+            <img id="previewImage" src="" alt="Preview">
+            <div class="preview-buttons">
+                <button id="downloadBtn">Unduh</button>
+                <button id="cancelPreviewBtn">Batal</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="navbar-bawah" class="navbar-bawah">
+        <button id="navHome"><span class="icon-navbar icon-home"> 
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 11.5L12 4L21 11.5V20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V11.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 21V14H15V21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span></button>
+    </div>
+
+    <script src="script.js?v=20261031-bsa12"></script>
+    <footer class="footer">
+  &copy; 2026 Budak Sunda Asli. All rights reserved.
+</footer>
+</body>
+</html>
+
+

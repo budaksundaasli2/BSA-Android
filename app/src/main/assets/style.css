@@ -1,0 +1,458 @@
+* {
+    box-sizing: border-box;
+}
+body {
+    margin: 0;
+    background: #000;
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    color: #fff;
+}
+#editor {
+    position: relative;
+    width: 360px;
+    max-width: 90%;
+    height: 360px;
+    background-color: #1a1a1a;
+    overflow: hidden;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+#editor:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5),
+                0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+#background {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    z-index: 0;
+}
+.gradient {
+    position: absolute;
+    width: 100%;
+    height: 90px;
+    z-index: 1;
+}
+.top-gradient {
+    top: 0px;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.9), transparent);
+}
+.bottom-gradient {
+    bottom: 0px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+}
+#text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 20px;
+    text-align: center;
+    z-index: 2;
+    white-space: pre-line;
+    padding: 0 20px;
+    width: 90%;
+    word-wrap: break-word;
+    font-weight: bold;
+    font-family: 'Amaranth', sans-serif;
+    text-shadow:
+        -1px -1px 0 #000,
+        1px -1px 0 #000,
+        -1px 1px 0 #000,
+        1px 1px 0 #000;
+    line-height: 1.4;
+    cursor: text;
+    outline: none;
+    transition: all 0.3s ease;
+}
+#text:focus {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+}
+#text:empty:before {
+    content: 'Klik untuk mengetik...';
+    color: rgba(255, 255, 255, 0.5);
+}
+#logo {
+    position: absolute;
+    bottom: 0px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 70px;
+    z-index: 2;
+    opacity: 0.6;
+}
+#
+.controls {
+    margin-top: 35px;
+    text-align: left;
+    background-color: #1a1a1a;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    width: 380px;
+    max-width: 90%;
+    border: 1px solid #333;
+}
+.controls label {
+    display: block;
+    margin-bottom: 12px;
+    font-weight: 600;
+    color: #fff;
+    font-size: 15px;
+}
+input[type="file"]::file-selector-button {
+    background-color: #2d2d2d;
+    color: #fff;
+    border: 1px solid #444;
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    font-size: 14px;
+    font-weight: 500;
+}
+input[type="file"]::file-selector-button:hover {
+    background-color: #3d3d3d;
+    border-color: #555;
+}
+input::placeholder {
+    color: #666;
+    font-weight: 400;
+}
+input[type="file"],
+input[type="text"],
+.text-input {
+    margin-bottom: 25px;
+    width: calc(100% - 2px);
+    padding: 14px 18px;
+    background: #2d2d2d;
+    border: 1px solid #444;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+input[type="file"]:focus,
+input[type="text"]:focus,
+.text-input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+}
+.text-input {
+    min-height: 100px;
+    resize: vertical;
+    font-family: 'Inter', sans-serif;
+    line-height: 1.5;
+}
+.text-input::placeholder {
+    color: #666;
+    font-weight: 400;
+}
+.button-group {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 10px;
+}
+#previewBtn {
+    background-color: #2196F3;
+}
+#saveBtn {
+    background-color: #4CAF50;
+}
+button {
+    flex: 1;
+    margin: 0;
+    padding: 16px 20px;
+    border: none;
+    color: white;
+    cursor: pointer;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+    white-space: nowrap;
+    min-width: 120px;
+}
+button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+#previewBtn:hover {
+    background-color: #1976D2;
+}
+#saveBtn:hover {
+    background-color: #45a049;
+}
+/* Modal Crop */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+}
+.modal-content {
+    position: relative;
+    margin: auto;
+    padding: 20px;
+    width: 90%;
+    max-width: 600px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #1a1a1a;
+    border-radius: 15px;
+    border: 1px solid #333;
+}
+#cropContainer {
+    width: 100%;
+    max-height: 70vh;
+    overflow: hidden;
+}
+#cropImage {
+    max-width: 100%;
+    display: block;
+}
+.crop-buttons {
+    margin-top: 20px;
+    text-align: center;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+#cropBtn {
+    background-color: #8A2BE2; /* Violet */
+    transition: all 0.3s ease;
+}
+#cropBtn:hover {
+    background-color: #9B4DEB;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(138, 43, 226, 0.4);
+}
+#cancelCropBtn {
+    background-color: #FF6B6B; /* Coral */
+    transition: all 0.3s ease;
+}
+#cancelCropBtn:hover {
+    background-color: #FF8787;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
+}
+.crop-buttons button {
+    flex: 1;
+    margin: 0;
+    padding: 16px 20px;
+    border: none;
+    color: white;
+    cursor: pointer;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    min-width: 120px;
+}
+@media (max-width: 480px) {
+    body { padding: 15px; }
+    #editor { width: 100%; height: auto; aspect-ratio: 1 / 1; max-width: 360px; }
+    #text { font-size: 18px; padding: 0 15px; }
+    #logo { width: 50px; }
+    .controls { padding: 25px; width: 100%; border-radius: 15px; }
+    .controls label { font-size: 14px; margin-bottom: 10px; }
+    input[type="file"]::file-selector-button { padding: 8px 15px; font-size: 13px; }
+    input[type="file"], input[type="text"], .text-input { padding: 12px 15px; margin-bottom: 20px; font-size: 15px; }
+    button { padding: 14px 30px; font-size: 17px; border-radius: 10px; }
+}
+/* Modal Preview */
+#previewModal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+}
+.preview-content {
+    position: relative;
+    margin: auto;
+    padding: 20px;
+    width: 90%;
+    max-width: 400px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #1a1a1a;
+    border-radius: 15px;
+    text-align: center;
+    border: 1px solid #333;
+}
+#previewImage {
+    width: 100%;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+.preview-buttons {
+    display: flex;
+    margin-top: 20px;
+}
+.preview-buttons button {
+    margin: 0;
+}
+#downloadBtn {
+    background-color: #4CAF50;
+}
+#cancelPreviewBtn {
+    background-color: #6c757d;
+}
+.navbar-bawah {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    background: rgba(0,0,0,0.6) !important;
+    border-top: none !important;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 8px 0;
+    z-index: 1000;
+}
+.navbar-bawah button {
+    background: none;
+    border: none;
+    font-size: 1.1em;
+    padding: 8px 20px;
+    cursor: pointer;
+    color: #fff !important;
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+.navbar-bawah button:hover {
+    background: #f0f0f0;
+}
+@media (max-width: 600px) {
+    .navbar-bawah {
+        padding: 0;
+        height: 60px;
+        min-height: 56px;
+        border-radius: 0;
+    }
+    .navbar-bawah button {
+        flex: 1 1 50%;
+        font-size: 1.2em;
+        padding: 14px 0;
+        min-width: 0;
+        border-radius: 0;
+        margin: 0;
+        height: 60px;
+    }
+}
+.footer {
+  text-align: center;
+  align-self: stretch;
+  padding: 1rem;
+  background-color: #000;
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+
+/* Kamera: ramah layar HP */
+.camera-actions { margin: 0 0 18px; }
+#openCameraBtn { width: 100%; background: #7c3aed; }
+.camera-content {
+    position: relative; top: 50%; transform: translateY(-50%);
+    width: min(94vw, 620px); margin: 0 auto; padding: 14px;
+    background: #171717; border: 1px solid #444; border-radius: 16px;
+}
+#cameraVideo { display: block; width: 100%; max-height: 68vh;
+    object-fit: contain; background: #000; border-radius: 10px; }
+.camera-message { color: #ddd; text-align: center; font-size: 13px; }
+.camera-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+.camera-buttons button { flex: 1 1 30%; min-width: 0; padding: 13px 8px; font-size: 14px; }
+#capturePhotoBtn { background: #16a34a; }
+#switchCameraBtn { background: #2563eb; }
+#closeCameraBtn { background: #555; }
+@media (max-width: 420px) {
+    body { padding: 12px; }
+    .camera-content { padding: 10px; }
+    .camera-buttons button { font-size: 12px; padding: 12px 5px; }
+}
+
+
+/* Layout unggah sesuai tampilan HP: pilih file dan kamera bertumpuk,
+   masing-masing selebar baris Preview/Unduh */
+.upload-row {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    width: 100%;
+    margin: 10px 0 25px;
+    box-sizing: border-box;
+}
+
+.upload-row > input[type="file"] {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    min-height: 58px;
+    margin: 0;
+    padding: 10px;
+    box-sizing: border-box;
+    font-size: 14px;
+}
+
+.upload-row .camera-actions {
+    display: flex;
+    width: 100%;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+.upload-row #openCameraBtn {
+    display: block;
+    flex: 1 1 100%;
+    width: 100%;
+    min-width: 0;
+    min-height: 58px;
+    height: auto;
+    margin: 0;
+    padding: 14px 12px;
+    box-sizing: border-box;
+    white-space: normal;
+}
+
+@media (max-width: 480px) {
+    .upload-row {
+        gap: 12px;
+        margin-bottom: 25px;
+    }
+    .upload-row > input[type="file"] {
+        width: 100%;
+        min-height: 58px;
+        padding: 10px;
+        font-size: 14px;
+    }
+    .upload-row #openCameraBtn {
+        width: 100%;
+        min-height: 58px;
+        padding: 14px 10px;
+        font-size: 16px;
+    }
+}
