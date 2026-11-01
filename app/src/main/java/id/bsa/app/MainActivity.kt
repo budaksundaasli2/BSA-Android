@@ -29,6 +29,7 @@ class MainActivity : ComponentActivity() {
     private var pendingWebPermission: PermissionRequest? = null
     private var pendingCameraUri: Uri? = null
     private var pendingCameraFile: File? = null
+    private var pendingNativeCameraPermission = false
 
     private val sdCardFolderPicker = registerForActivityResult(
         ActivityResultContracts.OpenDocumentTree()
@@ -55,8 +56,26 @@ class MainActivity : ComponentActivity() {
     ) { granted ->
         val request = pendingWebPermission
         pendingWebPermission = null
-        if (granted) request?.grant(arrayOf(PermissionRequest.RESOURCE_VIDEO_CAPTURE))
-        else request?.deny()
+
+        if (pendingNativeCameraPermission) {
+            pendingNativeCameraPermission = false
+            if (granted) {
+                launchNativeCameraForWebView()
+            } else {
+                fileCallback?.onReceiveValue(null)
+                fileCallback = null
+                Toast.makeText(
+                    this,
+                    "Izin kamera diperlukan untuk mengambil foto di BSA. Aktifkan izin Kamera melalui Pengaturan aplikasi jika ingin menggunakan fitur ini.",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        } else if (granted) {
+            request?.grant(arrayOf(PermissionRequest.RESOURCE_VIDEO_CAPTURE))
+        } else {
+            request?.deny()
+            Toast.makeText(this, "Izin kamera tidak diberikan", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private val nativeCameraLauncher = registerForActivityResult(
@@ -229,7 +248,17 @@ class MainActivity : ComponentActivity() {
 
                 // Input capture dari tombol Ambil Foto membuka aplikasi kamera Android.
                 if (isImageCaptureRequest(params)) {
-                    launchNativeCameraForWebView()
+                    // Minta izin kamera Android sebelum membuka fitur Ambil Foto.
+                    if (ContextCompat.checkSelfPermission(
+                            this@MainActivity,
+                            Manifest.permission.CAMERA
+                        ) == PackageManager.PERMISSION_GRANTED
+                    ) {
+                        launchNativeCameraForWebView()
+                    } else {
+                        pendingNativeCameraPermission = true
+                        cameraPermission.launch(Manifest.permission.CAMERA)
+                    }
                     return true
                 }
 
