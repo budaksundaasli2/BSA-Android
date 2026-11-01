@@ -456,3 +456,61 @@ button:hover {
         font-size: 16px;
     }
 }
+
+/* NAVIGASI PREVIEW - HOME - UNDUH */
+
+.button-group {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: 9px;
+    width: 100%;
+}
+
+.button-group button {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 58px;
+    padding: 12px 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+#previewBtn {
+    background-color: #2196F3;
+}
+
+#navHome {
+    background-color: #353535;
+    color: #fff;
+}
+
+#saveBtn {
+    background-color: #4CAF50;
+}
+
+.button-group button svg {
+    flex-shrink: 0;
+}
+
+@media (max-width: 380px) {
+    .button-group {
+        gap: 6px;
+    }
+
+    .button-group button {
+        font-size: 12px;
+        padding: 10px 3px;
+        gap: 3px;
+    }
+
+    .button-group button svg {
+        width: 18px;
+        height: 18px;
+    }
+}
