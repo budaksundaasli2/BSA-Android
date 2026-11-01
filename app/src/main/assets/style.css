@@ -499,3 +499,42 @@ body.light-mode .setting-help { color:#555; }
 body.light-mode .setting-version { border-color:#ddd; color:#444; }
 body.light-mode .setting-version strong { color:#171717; }
 body.light-mode .footer { background:#f2f3f5; color:#444; }
+
+
+/* Panel Pengaturan: masuk dengan animasi dari kiri ke kanan */
+.settings-panel {
+    position: fixed;
+    inset: 0;
+    z-index: 5000;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    max-height: 100dvh;
+    margin: 0;
+    padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border: 0;
+    border-radius: 0;
+    background: #171717;
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition: transform 280ms cubic-bezier(.22,.8,.25,1), visibility 280ms;
+    box-shadow: 12px 0 36px rgba(0,0,0,.28);
+}
+.settings-panel.settings-panel-open {
+    transform: translateX(0);
+    visibility: visible;
+}
+.settings-panel h2 {
+    margin-top: 8px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #444;
+}
+body.light-mode .settings-panel {
+    background: #f7f7f7;
+}
+@media (prefers-reduced-motion: reduce) {
+    .settings-panel { transition: none; }
+}

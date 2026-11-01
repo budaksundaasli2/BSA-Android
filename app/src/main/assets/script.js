@@ -59,8 +59,22 @@ function perbaruiDeskripsiPenyimpanan() {
         ? 'Tekan tombol Pilih folder SD Card, lalu pilih folder pada kartu microSD. BSA akan menyimpan hasil unduhan ke folder yang Anda izinkan.'
         : 'Hasil disimpan di penyimpanan internal khusus aplikasi BSA. File tidak otomatis tampil di Galeri dan dapat terhapus saat aplikasi dihapus.';
 }
-openSettingsBtn.addEventListener('click', () => { settingsPanel.hidden = !settingsPanel.hidden; });
-closeSettingsBtn.addEventListener('click', () => { settingsPanel.hidden = true; });
+function bukaPengaturan() {
+    settingsPanel.hidden = false;
+    // Memastikan browser menerapkan posisi awal sebelum animasi masuk.
+    settingsPanel.classList.remove('settings-panel-open');
+    requestAnimationFrame(() => settingsPanel.classList.add('settings-panel-open'));
+}
+function tutupPengaturan() {
+    settingsPanel.classList.remove('settings-panel-open');
+    window.setTimeout(() => {
+        if (!settingsPanel.classList.contains('settings-panel-open')) {
+            settingsPanel.hidden = true;
+        }
+    }, 300);
+}
+openSettingsBtn.addEventListener('click', bukaPengaturan);
+closeSettingsBtn.addEventListener('click', tutupPengaturan);
 darkModeToggle.addEventListener('change', () => {
     localStorage.setItem('bsa_dark_mode', String(darkModeToggle.checked));
     document.body.classList.toggle('light-mode', !darkModeToggle.checked);
