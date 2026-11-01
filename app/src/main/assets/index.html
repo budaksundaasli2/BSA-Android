@@ -31,11 +31,43 @@
             </div>
         </div>
 
-        <div class="button-group">
-            <button id="previewBtn">Preview</button>
-            <button id="saveBtn">Unduh</button>
-        </div>
-    </div>
+       
+<div class="button-group">
+    <button type="button" id="previewBtn">
+        <svg viewBox="0 0 24 24" width="21" height="21"
+             fill="none" stroke="currentColor"
+             stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+            <circle cx="8.5" cy="8.5" r="1.5"/>
+            <path d="m21 15-5-5L5 21"/>
+        </svg>
+        <span>Preview</span>
+    </button>
+
+    <button type="button" id="navHome">
+        <svg viewBox="0 0 24 24" width="21" height="21"
+             fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round"
+             stroke-linejoin="round">
+            <path d="m3 10 9-7 9 7"/>
+            <path d="M5 9v12h14V9"/>
+            <path d="M9 21v-7h6v7"/>
+        </svg>
+        <span>Home</span>
+    </button>
+
+    <button type="button" id="saveBtn">
+        <svg viewBox="0 0 24 24" width="21" height="21"
+             fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round"
+             stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <path d="m7 10 5 5 5-5"/>
+            <path d="M12 15V3"/>
+        </svg>
+        <span>Unduh</span>
+    </button>
+</div>
 
     <!-- Modal Kamera -->
     <div id="cameraModal" class="modal camera-modal" aria-hidden="true">
@@ -72,12 +104,6 @@
                 <button id="cancelPreviewBtn">Batal</button>
             </div>
         </div>
-    </div>
-
-    <div id="navbar-bawah" class="navbar-bawah">
-        <button id="navHome"><span class="icon-navbar icon-home"> 
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 11.5L12 4L21 11.5V20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V11.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 21V14H15V21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </span></button>
     </div>
 
     <script src="script.js?v=20261031-bsa12"></script>
