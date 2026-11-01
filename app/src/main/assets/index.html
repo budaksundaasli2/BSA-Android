@@ -31,6 +31,25 @@
             </div>
         </div>
 
+        <button type="button" id="openSettingsBtn" class="settings-open">⚙️ Pengaturan</button>
+        <section id="settingsPanel" class="settings-panel" hidden>
+            <h2>Pengaturan BSA</h2>
+            <label class="setting-row" for="darkModeToggle">
+                <span>Dark mode</span><input type="checkbox" id="darkModeToggle">
+            </label>
+            <label class="setting-row" for="watermarkToggle">
+                <span>Watermark BSA</span><input type="checkbox" id="watermarkToggle" checked>
+            </label>
+            <label for="storageLocation">Lokasi penyimpanan</label>
+            <select id="storageLocation" class="setting-select">
+                <option value="gallery">Galeri — Pictures/Budak Sunda Asli</option>
+                <option value="internal">Penyimpanan internal aplikasi</option>
+            </select>
+            <p id="storageDescription" class="setting-help">Hasil unduhan tersimpan di folder Pictures/Budak Sunda Asli dan tampil di galeri.</p>
+            <div class="setting-version">Versi BSA <strong id="appVersion">1.8</strong></div>
+            <button type="button" id="closeSettingsBtn" class="settings-close">Tutup</button>
+        </section>
+
         <div class="button-group" aria-label="Navigasi utama">
             <button id="previewBtn" type="button">Preview</button>
             <button id="navHome" class="home-button" type="button" aria-label="Home" title="Home">

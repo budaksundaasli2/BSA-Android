@@ -475,3 +475,26 @@ button:hover {
         padding-right: 3px;
     }
 }
+
+
+/* Pengaturan BSA */
+.settings-open { width:100%; margin-top:16px; background:#303030; border:1px solid #555; }
+.settings-panel { width:100%; margin-top:14px; padding:20px; border-radius:16px; background:#202020; border:1px solid #444; color:#fff; }
+.settings-panel[hidden] { display:none; }
+.settings-panel h2 { margin:0 0 16px; font-size:19px; }
+.setting-row { display:flex !important; align-items:center; justify-content:space-between; gap:12px; margin:14px 0 !important; }
+.setting-row input { width:22px; height:22px; accent-color:#2196f3; }
+.setting-select { display:block; width:100%; margin:10px 0 8px; padding:13px; color:#fff; background:#303030; border:1px solid #555; border-radius:10px; font-size:14px; }
+.setting-help { color:#bbb; font-size:12px; line-height:1.5; }
+.setting-version { margin:16px 0; padding-top:14px; border-top:1px solid #444; color:#ccc; }
+.setting-version strong { float:right; color:#fff; }
+.settings-close { width:100%; background:#555; }
+body.light-mode { background:#f2f3f5; color:#171717; }
+body.light-mode .controls, body.light-mode .settings-panel { background:#fff; color:#171717; border-color:#ddd; }
+body.light-mode .controls label, body.light-mode .settings-panel label { color:#171717; }
+body.light-mode .settings-panel { background:#fff; }
+body.light-mode .setting-select { background:#f7f7f7; color:#171717; border-color:#ccc; }
+body.light-mode .setting-help { color:#555; }
+body.light-mode .setting-version { border-color:#ddd; color:#444; }
+body.light-mode .setting-version strong { color:#171717; }
+body.light-mode .footer { background:#f2f3f5; color:#444; }

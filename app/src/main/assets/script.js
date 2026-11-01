@@ -31,6 +31,48 @@ const closeCameraBtn = document.getElementById('closeCameraBtn');
 let cameraStream = null;
 let cameraFacingMode = 'environment';
 
+// Pengaturan aplikasi BSA (tersimpan di perangkat).
+const settingsPanel = document.getElementById('settingsPanel');
+const openSettingsBtn = document.getElementById('openSettingsBtn');
+const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+const darkModeToggle = document.getElementById('darkModeToggle');
+const watermarkToggle = document.getElementById('watermarkToggle');
+const storageLocation = document.getElementById('storageLocation');
+const storageDescription = document.getElementById('storageDescription');
+
+function muatPengaturanBSA() {
+    const dark = localStorage.getItem('bsa_dark_mode') !== 'false';
+    const watermark = localStorage.getItem('bsa_watermark') !== 'false';
+    const location = localStorage.getItem('bsa_storage_location') || 'gallery';
+    darkModeToggle.checked = dark;
+    watermarkToggle.checked = watermark;
+    storageLocation.value = location;
+    document.body.classList.toggle('light-mode', !dark);
+    if (logo) logo.style.display = watermark ? '' : 'none';
+    perbaruiDeskripsiPenyimpanan();
+}
+function perbaruiDeskripsiPenyimpanan() {
+    storageDescription.textContent = storageLocation.value === 'internal'
+        ? 'Hasil disimpan di penyimpanan internal khusus aplikasi BSA. File tidak otomatis tampil di Galeri dan dapat terhapus saat aplikasi dihapus.'
+        : 'Hasil unduhan tersimpan di folder Pictures/Budak Sunda Asli dan tampil di galeri.';
+}
+openSettingsBtn.addEventListener('click', () => { settingsPanel.hidden = !settingsPanel.hidden; });
+closeSettingsBtn.addEventListener('click', () => { settingsPanel.hidden = true; });
+darkModeToggle.addEventListener('change', () => {
+    localStorage.setItem('bsa_dark_mode', String(darkModeToggle.checked));
+    document.body.classList.toggle('light-mode', !darkModeToggle.checked);
+});
+watermarkToggle.addEventListener('change', () => {
+    localStorage.setItem('bsa_watermark', String(watermarkToggle.checked));
+    if (logo) logo.style.display = watermarkToggle.checked ? '' : 'none';
+});
+storageLocation.addEventListener('change', () => {
+    localStorage.setItem('bsa_storage_location', storageLocation.value);
+    perbaruiDeskripsiPenyimpanan();
+});
+muatPengaturanBSA();
+
+
 // Modal untuk daftar tersimpan
 let modalTersimpan = null;
 function buatModalTersimpan() {
@@ -178,7 +220,7 @@ async function unduhGambar(imageData) {
 
     const fileName = generateFileName();
     if (window.AndroidBridge && typeof window.AndroidBridge.saveImage === 'function') {
-        const berhasil = window.AndroidBridge.saveImage(imageData, fileName);
+        const berhasil = window.AndroidBridge.saveImage(imageData, fileName, localStorage.getItem('bsa_storage_location') || 'gallery');
         if (!berhasil) throw new Error('Android gagal menyimpan gambar. Periksa ruang penyimpanan lalu coba lagi.');
         return;
     }
@@ -485,6 +527,10 @@ ctx.restore();
                 ctx.fillText(line, hdSize / 2, y);
             });
 
+            if (localStorage.getItem('bsa_watermark') === 'false') {
+                callback(canvas.toDataURL("image/png", 1.0));
+                return;
+            }
             const logoImg = new Image();
             logoImg.crossOrigin = "anonymous";
             logoImg.src = "logo-bsa.png";

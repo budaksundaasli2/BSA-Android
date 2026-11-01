@@ -229,7 +229,7 @@ class MainActivity : ComponentActivity() {
     /** Simpan PNG ke galeri pada Android 10+, tanpa meminta izin storage umum. */
     private inner class AndroidDownloadBridge {
         @JavascriptInterface
-        fun saveImage(dataUrl: String, requestedName: String): Boolean {
+        fun saveImage(dataUrl: String, requestedName: String, requestedLocation: String): Boolean {
             return try {
                 require(dataUrl.startsWith("data:image/png;base64,")) {
                     "Format gambar bukan PNG"
@@ -243,48 +243,45 @@ class MainActivity : ComponentActivity() {
                     .replace(Regex("[^A-Za-z0-9._-]"), "_")
                     .let { if (it.endsWith(".png", ignoreCase = true)) it else "$it.png" }
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val useInternalStorage = requestedLocation == "internal"
+                if (useInternalStorage) {
+                    val directory = File(filesDir, "BSA")
+                    if (!directory.exists() && !directory.mkdirs()) {
+                        error("Folder penyimpanan internal tidak dapat dibuat")
+                    }
+                    File(directory, safeName).writeBytes(bytes)
+                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     val values = ContentValues().apply {
                         put(MediaStore.Images.Media.DISPLAY_NAME, safeName)
                         put(MediaStore.Images.Media.MIME_TYPE, "image/png")
-                        put(
-                            MediaStore.Images.Media.RELATIVE_PATH,
-                            Environment.DIRECTORY_PICTURES + "/Budak Sunda Asli"
-                        )
+                        put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/Budak Sunda Asli")
                         put(MediaStore.Images.Media.IS_PENDING, 1)
                     }
-
-                    val uri = contentResolver.insert(
-                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                        values
-                    ) ?: error("Tidak dapat membuat file gambar")
-
+                    val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+                        ?: error("Tidak dapat membuat file gambar")
                     try {
                         contentResolver.openOutputStream(uri, "w")?.use { it.write(bytes) }
                             ?: error("Tidak dapat membuka file gambar")
-                        val publish = ContentValues().apply {
-                            put(MediaStore.Images.Media.IS_PENDING, 0)
-                        }
+                        val publish = ContentValues().apply { put(MediaStore.Images.Media.IS_PENDING, 0) }
                         contentResolver.update(uri, publish, null, null)
                     } catch (error: Exception) {
                         contentResolver.delete(uri, null, null)
                         throw error
                     }
                 } else {
-                    // Untuk Android 9 ke bawah, simpan di folder Pictures milik aplikasi.
-                    val directory = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-                        ?: error("Folder penyimpanan tidak tersedia")
+                    val directory = File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "Budak Sunda Asli")
                     if (!directory.exists() && !directory.mkdirs()) {
                         error("Tidak dapat membuat folder penyimpanan")
                     }
                     File(directory, safeName).writeBytes(bytes)
                 }
 
-                val saveLocationMessage = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    "PNG berhasil disimpan di Pictures/Budak Sunda Asli"
+                val saveLocationMessage = if (useInternalStorage) {
+                    "PNG disimpan di penyimpanan internal aplikasi BSA"
                 } else {
-                    "PNG berhasil disimpan di folder Gambar aplikasi BSA"
+                    "PNG berhasil disimpan di Pictures/Budak Sunda Asli"
                 }
+
                 runOnUiThread {
                     Toast.makeText(
                         this@MainActivity,
