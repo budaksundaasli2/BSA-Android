@@ -538,3 +538,12 @@ body.light-mode .settings-panel {
 @media (prefers-reduced-motion: reduce) {
     .settings-panel { transition: none; }
 }
+
+
+/* Petunjuk gesture pada panel Pengaturan */
+.settings-gesture-hint {
+    margin: -6px 0 18px;
+    color: #999;
+    font-size: 12px;
+    text-align: center;
+}

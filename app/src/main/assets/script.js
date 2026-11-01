@@ -33,8 +33,6 @@ let cameraFacingMode = 'environment';
 
 // Pengaturan aplikasi BSA (tersimpan di perangkat).
 const settingsPanel = document.getElementById('settingsPanel');
-const openSettingsBtn = document.getElementById('openSettingsBtn');
-const closeSettingsBtn = document.getElementById('closeSettingsBtn');
 const darkModeToggle = document.getElementById('darkModeToggle');
 const watermarkToggle = document.getElementById('watermarkToggle');
 const storageLocation = document.getElementById('storageLocation');
@@ -73,8 +71,40 @@ function tutupPengaturan() {
         }
     }, 300);
 }
-openSettingsBtn.addEventListener('click', bukaPengaturan);
-closeSettingsBtn.addEventListener('click', tutupPengaturan);
+// Navigasi Pengaturan menggunakan gesture geser (swipe), tanpa tombol.
+let swipeStartX = 0;
+let swipeStartY = 0;
+let swipeTracking = false;
+document.addEventListener('touchstart', (event) => {
+    if (!event.touches || event.touches.length !== 1) return;
+    const touch = event.touches[0];
+    const panelTerbuka = !settingsPanel.hidden && settingsPanel.classList.contains('settings-panel-open');
+    // Saat tertutup, gesture dimulai dari tepi kiri layar.
+    // Saat terbuka, gesture dapat dimulai dari area panel untuk menutupnya.
+    if ((!panelTerbuka && touch.clientX <= 32) || (panelTerbuka && settingsPanel.contains(event.target))) {
+        swipeStartX = touch.clientX;
+        swipeStartY = touch.clientY;
+        swipeTracking = true;
+    } else {
+        swipeTracking = false;
+    }
+}, { passive: true });
+
+document.addEventListener('touchend', (event) => {
+    if (!swipeTracking || !event.changedTouches || !event.changedTouches.length) return;
+    const touch = event.changedTouches[0];
+    const deltaX = touch.clientX - swipeStartX;
+    const deltaY = touch.clientY - swipeStartY;
+    // Abaikan scroll vertikal dan geseran pendek.
+    if (Math.abs(deltaX) >= 70 && Math.abs(deltaX) > Math.abs(deltaY) * 1.3) {
+        const panelTerbuka = !settingsPanel.hidden && settingsPanel.classList.contains('settings-panel-open');
+        if (!panelTerbuka && deltaX > 0) bukaPengaturan();
+        else if (panelTerbuka && deltaX < 0) tutupPengaturan();
+    }
+    swipeTracking = false;
+}, { passive: true });
+
+document.addEventListener('touchcancel', () => { swipeTracking = false; }, { passive: true });
 darkModeToggle.addEventListener('change', () => {
     localStorage.setItem('bsa_dark_mode', String(darkModeToggle.checked));
     document.body.classList.toggle('light-mode', !darkModeToggle.checked);
