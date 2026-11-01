@@ -54,3 +54,10 @@ Setelah source diunggah ke branch `main`, GitHub Actions akan membangun APK debu
 - Foto disimpan sementara melalui AndroidX `FileProvider`, lalu dikirim kembali ke WebView sebagai file untuk proses crop.
 - Tombol **Pilih Gambar Latar Belakang** tetap membuka galeri/pemilih file.
 - Build APK melalui GitHub Actions seperti biasa.
+
+
+## Pengaturan BSA
+- Dark mode dan watermark BSA dapat diaktifkan/dinonaktifkan dari panel Pengaturan.
+- Lokasi penyimpanan hasil PNG: **Internal** atau **SD Card**.
+- Untuk SD Card, pilih **SD Card** pada pengaturan, tekan **Pilih folder SD Card**, lalu pilih folder pada kartu microSD melalui pemilih folder Android. Izin folder disimpan agar dapat digunakan kembali.
+- Versi aplikasi: 1.8.

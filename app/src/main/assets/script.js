@@ -39,11 +39,12 @@ const darkModeToggle = document.getElementById('darkModeToggle');
 const watermarkToggle = document.getElementById('watermarkToggle');
 const storageLocation = document.getElementById('storageLocation');
 const storageDescription = document.getElementById('storageDescription');
+const chooseSdCardFolderBtn = document.getElementById('chooseSdCardFolderBtn');
 
 function muatPengaturanBSA() {
     const dark = localStorage.getItem('bsa_dark_mode') !== 'false';
     const watermark = localStorage.getItem('bsa_watermark') !== 'false';
-    const location = localStorage.getItem('bsa_storage_location') || 'gallery';
+    const location = localStorage.getItem('bsa_storage_location') || 'internal';
     darkModeToggle.checked = dark;
     watermarkToggle.checked = watermark;
     storageLocation.value = location;
@@ -52,9 +53,11 @@ function muatPengaturanBSA() {
     perbaruiDeskripsiPenyimpanan();
 }
 function perbaruiDeskripsiPenyimpanan() {
-    storageDescription.textContent = storageLocation.value === 'internal'
-        ? 'Hasil disimpan di penyimpanan internal khusus aplikasi BSA. File tidak otomatis tampil di Galeri dan dapat terhapus saat aplikasi dihapus.'
-        : 'Hasil unduhan tersimpan di folder Pictures/Budak Sunda Asli dan tampil di galeri.';
+    const isSdCard = storageLocation.value === 'sdcard';
+    chooseSdCardFolderBtn.hidden = !isSdCard;
+    storageDescription.textContent = isSdCard
+        ? 'Tekan tombol Pilih folder SD Card, lalu pilih folder pada kartu microSD. BSA akan menyimpan hasil unduhan ke folder yang Anda izinkan.'
+        : 'Hasil disimpan di penyimpanan internal khusus aplikasi BSA. File tidak otomatis tampil di Galeri dan dapat terhapus saat aplikasi dihapus.';
 }
 openSettingsBtn.addEventListener('click', () => { settingsPanel.hidden = !settingsPanel.hidden; });
 closeSettingsBtn.addEventListener('click', () => { settingsPanel.hidden = true; });
@@ -69,6 +72,10 @@ watermarkToggle.addEventListener('change', () => {
 storageLocation.addEventListener('change', () => {
     localStorage.setItem('bsa_storage_location', storageLocation.value);
     perbaruiDeskripsiPenyimpanan();
+});
+chooseSdCardFolderBtn.addEventListener('click', () => {
+    if (window.AndroidBridge?.chooseSdCardFolder) window.AndroidBridge.chooseSdCardFolder();
+    else alert('Pemilihan folder SD Card hanya tersedia di aplikasi Android BSA.');
 });
 muatPengaturanBSA();
 
@@ -220,7 +227,7 @@ async function unduhGambar(imageData) {
 
     const fileName = generateFileName();
     if (window.AndroidBridge && typeof window.AndroidBridge.saveImage === 'function') {
-        const berhasil = window.AndroidBridge.saveImage(imageData, fileName, localStorage.getItem('bsa_storage_location') || 'gallery');
+        const berhasil = window.AndroidBridge.saveImage(imageData, fileName, localStorage.getItem('bsa_storage_location') || 'internal');
         if (!berhasil) throw new Error('Android gagal menyimpan gambar. Periksa ruang penyimpanan lalu coba lagi.');
         return;
     }

@@ -489,6 +489,7 @@ button:hover {
 .setting-version { margin:16px 0; padding-top:14px; border-top:1px solid #444; color:#ccc; }
 .setting-version strong { float:right; color:#fff; }
 .settings-close { width:100%; background:#555; }
+#chooseSdCardFolderBtn { margin:6px 0 10px; background:#245b91; }
 body.light-mode { background:#f2f3f5; color:#171717; }
 body.light-mode .controls, body.light-mode .settings-panel { background:#fff; color:#171717; border-color:#ddd; }
 body.light-mode .controls label, body.light-mode .settings-panel label { color:#171717; }

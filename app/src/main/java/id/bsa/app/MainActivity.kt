@@ -19,6 +19,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.documentfile.provider.DocumentFile
 import androidx.webkit.WebViewAssetLoader
 import java.io.File
 
@@ -28,6 +29,26 @@ class MainActivity : ComponentActivity() {
     private var pendingWebPermission: PermissionRequest? = null
     private var pendingCameraUri: Uri? = null
     private var pendingCameraFile: File? = null
+
+    private val sdCardFolderPicker = registerForActivityResult(
+        ActivityResultContracts.OpenDocumentTree()
+    ) { uri ->
+        if (uri != null) {
+            try {
+                contentResolver.takePersistableUriPermission(
+                    uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                )
+                getSharedPreferences("bsa_settings", MODE_PRIVATE)
+                    .edit().putString("sdcard_tree_uri", uri.toString()).apply()
+                Toast.makeText(this, "Folder SD Card berhasil dipilih", Toast.LENGTH_LONG).show()
+            } catch (error: Exception) {
+                Toast.makeText(this, "Gagal menyimpan izin folder: ${error.message}", Toast.LENGTH_LONG).show()
+            }
+        } else {
+            Toast.makeText(this, "Pemilihan folder SD Card dibatalkan", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     private val cameraPermission = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -226,8 +247,17 @@ class MainActivity : ComponentActivity() {
         webView.loadUrl("https://appassets.androidplatform.net/assets/index.html")
     }
 
-    /** Simpan PNG ke galeri pada Android 10+, tanpa meminta izin storage umum. */
+    private fun pilihFolderSdCard() {
+        sdCardFolderPicker.launch(null)
+    }
+
+    /** Bridge untuk pengaturan dan penyimpanan gambar aplikasi. */
     private inner class AndroidDownloadBridge {
+        @JavascriptInterface
+        fun chooseSdCardFolder() {
+            runOnUiThread { pilihFolderSdCard() }
+        }
+
         @JavascriptInterface
         fun saveImage(dataUrl: String, requestedName: String, requestedLocation: String): Boolean {
             return try {
@@ -244,12 +274,25 @@ class MainActivity : ComponentActivity() {
                     .let { if (it.endsWith(".png", ignoreCase = true)) it else "$it.png" }
 
                 val useInternalStorage = requestedLocation == "internal"
+                val useSdCard = requestedLocation == "sdcard"
                 if (useInternalStorage) {
                     val directory = File(filesDir, "BSA")
                     if (!directory.exists() && !directory.mkdirs()) {
                         error("Folder penyimpanan internal tidak dapat dibuat")
                     }
                     File(directory, safeName).writeBytes(bytes)
+                } else if (useSdCard) {
+                    val treeUriString = getSharedPreferences("bsa_settings", MODE_PRIVATE)
+                        .getString("sdcard_tree_uri", null)
+                        ?: error("Pilih folder SD Card terlebih dahulu melalui Pengaturan")
+                    val tree = DocumentFile.fromTreeUri(this@MainActivity, Uri.parse(treeUriString))
+                        ?: error("Folder SD Card tidak dapat diakses. Pilih ulang foldernya")
+                    if (!tree.canWrite()) error("Folder SD Card tidak memiliki izin tulis. Pilih folder lain")
+                    tree.findFile(safeName)?.delete()
+                    val outputFile = tree.createFile("image/png", safeName)
+                        ?: error("Tidak dapat membuat file di SD Card")
+                    contentResolver.openOutputStream(outputFile.uri, "w")?.use { it.write(bytes) }
+                        ?: error("Tidak dapat menulis file ke SD Card")
                 } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     val values = ContentValues().apply {
                         put(MediaStore.Images.Media.DISPLAY_NAME, safeName)
@@ -276,10 +319,10 @@ class MainActivity : ComponentActivity() {
                     File(directory, safeName).writeBytes(bytes)
                 }
 
-                val saveLocationMessage = if (useInternalStorage) {
-                    "PNG disimpan di penyimpanan internal aplikasi BSA"
-                } else {
-                    "PNG berhasil disimpan di Pictures/Budak Sunda Asli"
+                val saveLocationMessage = when {
+                    useInternalStorage -> "PNG disimpan di penyimpanan internal aplikasi BSA"
+                    useSdCard -> "PNG berhasil disimpan ke folder SD Card pilihan Anda"
+                    else -> "PNG berhasil disimpan di Pictures/Budak Sunda Asli"
                 }
 
                 runOnUiThread {
