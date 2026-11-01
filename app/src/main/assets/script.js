@@ -302,7 +302,13 @@ async function mulaiKamera() {
     }
 }
 
-openCameraBtn.addEventListener('click', mulaiKamera);
+// Panggil kamera bawaan Android. WebView akan meneruskan input capture
+// ke ACTION_IMAGE_CAPTURE melalui onShowFileChooser di MainActivity.
+openCameraBtn.addEventListener('click', () => {
+    cameraFacingMode = 'environment';
+    cameraCaptureInput.setAttribute('capture', 'environment');
+    cameraCaptureInput.click();
+});
 switchCameraBtn.addEventListener('click', async () => {
     cameraFacingMode = cameraFacingMode === 'environment' ? 'user' : 'environment';
     cameraCaptureInput.setAttribute('capture', cameraFacingMode);

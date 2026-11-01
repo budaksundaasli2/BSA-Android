@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Amaranth:wght@700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=20261101-bsa17-black-icon">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 </head>
@@ -31,43 +31,18 @@
             </div>
         </div>
 
-       
-<div class="button-group">
-    <button type="button" id="previewBtn">
-        <svg viewBox="0 0 24 24" width="21" height="21"
-             fill="none" stroke="currentColor"
-             stroke-width="2">
-            <rect x="3" y="3" width="18" height="18" rx="2"/>
-            <circle cx="8.5" cy="8.5" r="1.5"/>
-            <path d="m21 15-5-5L5 21"/>
-        </svg>
-        <span>Preview</span>
-    </button>
-
-    <button type="button" id="navHome">
-        <svg viewBox="0 0 24 24" width="21" height="21"
-             fill="none" stroke="currentColor"
-             stroke-width="2" stroke-linecap="round"
-             stroke-linejoin="round">
-            <path d="m3 10 9-7 9 7"/>
-            <path d="M5 9v12h14V9"/>
-            <path d="M9 21v-7h6v7"/>
-        </svg>
-        <span>Home</span>
-    </button>
-
-    <button type="button" id="saveBtn">
-        <svg viewBox="0 0 24 24" width="21" height="21"
-             fill="none" stroke="currentColor"
-             stroke-width="2" stroke-linecap="round"
-             stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <path d="m7 10 5 5 5-5"/>
-            <path d="M12 15V3"/>
-        </svg>
-        <span>Unduh</span>
-    </button>
-</div>
+        <div class="button-group" aria-label="Navigasi utama">
+            <button id="previewBtn" type="button">Preview</button>
+            <button id="navHome" class="home-button" type="button" aria-label="Home" title="Home">
+                <svg class="home-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M3 11.5L12 4L21 11.5V20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V11.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9 21V14H15V21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="home-label">Home</span>
+            </button>
+            <button id="saveBtn" type="button">Unduh</button>
+        </div>
+    </div>
 
     <!-- Modal Kamera -->
     <div id="cameraModal" class="modal camera-modal" aria-hidden="true">
@@ -106,7 +81,7 @@
         </div>
     </div>
 
-    <script src="script.js?v=20261031-bsa12"></script>
+    <script src="script.js?v=20261101-bsa17-black-icon"></script>
     <footer class="footer">
   &copy; 2026 Budak Sunda Asli. All rights reserved.
 </footer>

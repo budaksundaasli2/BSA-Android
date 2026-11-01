@@ -27,9 +27,30 @@ Source ini sudah diperbarui dan diperiksa secara statis. APK v1.2 belum dikompil
 - Ikon launcher dan fitur aplikasi lainnya dipertahankan.
 
 
-## Ikon launcher BSA v1.4
+## Versi 1.6 — Navigasi Preview / Home / Unduh
 
-Ikon launcher memakai logo kubus BSA hitam-putih dari aset yang disediakan.
-File adaptive icon berada di `app/src/main/res/drawable-nodpi/` dan
-`app/src/main/res/mipmap-anydpi-v26/`; ikon legacy berada di folder `mipmap-*`.
-Latar adaptive icon berwarna putih agar sesuai dengan gambar sumber.
+- Tombol Home dipindahkan ke tengah, di antara Preview dan Unduh.
+- Navigasi Home lama di bagian bawah halaman dihapus agar tidak muncul dua kali.
+- Tombol Home tetap memakai fungsi kembali ke halaman utama yang sudah ada di `script.js`.
+- Cache JavaScript diperbarui agar browser memuat skrip terbaru.
+- Versi Android dinaikkan menjadi 1.6 (versionCode 7).
+- Workflow Android SDK diperbarui ke `android-actions/setup-android@v4` agar tidak meminta paket SDK `tools` yang sudah tidak tersedia.
+
+
+## Versi 1.7 — ikon latar hitam
+
+- Ikon launcher diganti menjadi logo kubus putih dengan latar hitam sesuai referensi terbaru.
+- Varian legacy, round, adaptive foreground, dan monochrome diperbarui.
+- Label aplikasi tetap `BSA`.
+- Versi aplikasi: `1.7` (versionCode `8`).
+- Workflow build menggunakan `android-actions/setup-android@v4`.
+
+Setelah source diunggah ke branch `main`, GitHub Actions akan membangun APK debug dan mengunggahnya sebagai artifact `BSA-Android-APK`.
+
+
+## Versi 1.8 — Kamera bawaan Android
+
+- Tombol **Ambil Foto** membuka aplikasi kamera bawaan Android melalui `MediaStore.ACTION_IMAGE_CAPTURE`.
+- Foto disimpan sementara melalui AndroidX `FileProvider`, lalu dikirim kembali ke WebView sebagai file untuk proses crop.
+- Tombol **Pilih Gambar Latar Belakang** tetap membuka galeri/pemilih file.
+- Build APK melalui GitHub Actions seperti biasa.

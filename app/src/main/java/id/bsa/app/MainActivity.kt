@@ -2,7 +2,9 @@ package id.bsa.app
 
 import android.Manifest
 import android.app.Activity
+import android.content.ClipData
 import android.content.ContentValues
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -16,6 +18,7 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.webkit.WebViewAssetLoader
 import java.io.File
 
@@ -23,6 +26,8 @@ class MainActivity : ComponentActivity() {
     private lateinit var webView: WebView
     private var fileCallback: ValueCallback<Array<Uri>>? = null
     private var pendingWebPermission: PermissionRequest? = null
+    private var pendingCameraUri: Uri? = null
+    private var pendingCameraFile: File? = null
 
     private val cameraPermission = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -31,6 +36,26 @@ class MainActivity : ComponentActivity() {
         pendingWebPermission = null
         if (granted) request?.grant(arrayOf(PermissionRequest.RESOURCE_VIDEO_CAPTURE))
         else request?.deny()
+    }
+
+    private val nativeCameraLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val callback = fileCallback
+        fileCallback = null
+        val photoUri = pendingCameraUri
+        val photoFile = pendingCameraFile
+        pendingCameraUri = null
+        pendingCameraFile = null
+
+        if (result.resultCode == Activity.RESULT_OK &&
+            photoUri != null && photoFile != null && photoFile.exists() && photoFile.length() > 0L
+        ) {
+            callback?.onReceiveValue(arrayOf(photoUri))
+        } else {
+            photoFile?.delete()
+            callback?.onReceiveValue(null)
+        }
     }
 
     private val filePicker = registerForActivityResult(
@@ -50,6 +75,61 @@ class MainActivity : ComponentActivity() {
             }
             callback?.onReceiveValue(uris)
         } else callback?.onReceiveValue(null)
+    }
+
+    private fun isImageCaptureRequest(params: WebChromeClient.FileChooserParams?): Boolean {
+        if (params?.isCaptureEnabled != true) return false
+        val acceptedTypes = params.acceptTypes
+            .filter { it.isNotBlank() }
+            .map { it.trim().lowercase() }
+        return acceptedTypes.isEmpty() || acceptedTypes.any {
+            it == "*/*" || it.startsWith("image/")
+        }
+    }
+
+    private fun launchNativeCameraForWebView() {
+        val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        if (cameraIntent.resolveActivity(packageManager) == null) {
+            fileCallback?.onReceiveValue(null)
+            fileCallback = null
+            Toast.makeText(this, "Aplikasi kamera tidak ditemukan", Toast.LENGTH_LONG).show()
+            return
+        }
+
+        try {
+            val cameraDirectory = File(cacheDir, "bsa-camera")
+            if (!cameraDirectory.exists() && !cameraDirectory.mkdirs()) {
+                error("Folder foto sementara tidak dapat dibuat")
+            }
+            val photoFile = File(cameraDirectory, "BSA_${System.currentTimeMillis()}.jpg")
+            val photoUri = FileProvider.getUriForFile(
+                this,
+                "$packageName.fileprovider",
+                photoFile
+            )
+
+            cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
+            cameraIntent.addFlags(
+                Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            )
+            cameraIntent.clipData = ClipData.newUri(contentResolver, "BSA camera photo", photoUri)
+
+            pendingCameraFile = photoFile
+            pendingCameraUri = photoUri
+            nativeCameraLauncher.launch(cameraIntent)
+        } catch (error: ActivityNotFoundException) {
+            fileCallback?.onReceiveValue(null)
+            fileCallback = null
+            Toast.makeText(this, "Tidak dapat membuka kamera: ${error.message}", Toast.LENGTH_LONG).show()
+        } catch (error: Exception) {
+            pendingCameraFile?.delete()
+            pendingCameraFile = null
+            pendingCameraUri = null
+            fileCallback?.onReceiveValue(null)
+            fileCallback = null
+            Toast.makeText(this, "Gagal menyiapkan kamera: ${error.message}", Toast.LENGTH_LONG).show()
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -125,6 +205,14 @@ class MainActivity : ComponentActivity() {
             ): Boolean {
                 fileCallback?.onReceiveValue(null)
                 fileCallback = callback
+
+                // Input capture dari tombol Ambil Foto membuka aplikasi kamera Android.
+                if (isImageCaptureRequest(params)) {
+                    launchNativeCameraForWebView()
+                    return true
+                }
+
+                // Input biasa tetap membuka pemilih gambar/galeri.
                 val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
                     addCategory(Intent.CATEGORY_OPENABLE)
                     type = "image/*"

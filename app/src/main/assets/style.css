@@ -319,49 +319,6 @@ button:hover {
 #cancelPreviewBtn {
     background-color: #6c757d;
 }
-.navbar-bawah {
-    position: fixed;
-    left: 0;
-    bottom: 0;
-    width: 100%;
-    background: rgba(0,0,0,0.6) !important;
-    border-top: none !important;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    padding: 8px 0;
-    z-index: 1000;
-}
-.navbar-bawah button {
-    background: none;
-    border: none;
-    font-size: 1.1em;
-    padding: 8px 20px;
-    cursor: pointer;
-    color: #fff !important;
-    border-radius: 8px;
-    transition: background 0.2s;
-}
-.navbar-bawah button:hover {
-    background: #f0f0f0;
-}
-@media (max-width: 600px) {
-    .navbar-bawah {
-        padding: 0;
-        height: 60px;
-        min-height: 56px;
-        border-radius: 0;
-    }
-    .navbar-bawah button {
-        flex: 1 1 50%;
-        font-size: 1.2em;
-        padding: 14px 0;
-        min-width: 0;
-        border-radius: 0;
-        margin: 0;
-        height: 60px;
-    }
-}
 .footer {
   text-align: center;
   align-self: stretch;
@@ -457,60 +414,64 @@ button:hover {
     }
 }
 
-/* NAVIGASI PREVIEW - HOME - UNDUH */
 
+/* Navigasi aksi utama: Preview | Home | Unduh */
 .button-group {
-    display: flex;
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 68px minmax(0, 1fr);
     align-items: stretch;
-    justify-content: space-between;
-    gap: 9px;
+    gap: 8px;
     width: 100%;
+    margin-top: 10px;
 }
 
 .button-group button {
-    flex: 1 1 0;
     min-width: 0;
-    min-height: 58px;
-    padding: 12px 5px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
+    width: 100%;
+    height: 58px;
+    padding: 10px 5px;
     font-size: 14px;
-    white-space: nowrap;
-}
-
-#previewBtn {
-    background-color: #2196F3;
+    line-height: 1.1;
 }
 
 #navHome {
-    background-color: #353535;
-    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 5px 2px;
+    background: #303030;
+    border: 1px solid #555;
+    border-radius: 12px;
 }
 
-#saveBtn {
-    background-color: #4CAF50;
+#navHome:hover {
+    background: #414141;
 }
 
-.button-group button svg {
-    flex-shrink: 0;
+#navHome .home-icon {
+    display: block;
+    width: 23px;
+    height: 23px;
+    flex: 0 0 auto;
 }
 
-@media (max-width: 380px) {
+#navHome .home-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+@media (max-width: 360px) {
     .button-group {
+        grid-template-columns: minmax(0, 1fr) 62px minmax(0, 1fr);
         gap: 6px;
     }
-
     .button-group button {
-        font-size: 12px;
-        padding: 10px 3px;
-        gap: 3px;
-    }
-
-    .button-group button svg {
-        width: 18px;
-        height: 18px;
+        font-size: 13px;
+        padding-left: 3px;
+        padding-right: 3px;
     }
 }
