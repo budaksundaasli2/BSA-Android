@@ -236,8 +236,32 @@ function tampilkanModalGambarTersimpan(img, index) {
 }
 
 navHome.addEventListener('click', () => {
-    window.location.reload();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 });
+
+// Navigasi bawah BSA: Home, Lens, Koleksi, Pengaturan.
+const bsaNavItems = document.querySelectorAll('.bsa-nav-item');
+function setBsaNav(page) {
+    bsaNavItems.forEach(item => item.classList.toggle('active', item.dataset.page === page));
+}
+bsaNavItems.forEach(item => item.addEventListener('click', () => {
+    const page = item.dataset.page;
+    setBsaNav(page);
+    if (page === 'home') {
+        tutupPengaturan();
+        document.getElementById('lensPanel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (page === 'lens') {
+        tutupPengaturan();
+        document.getElementById('lensPanel')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else if (page === 'collection') {
+        tutupPengaturan();
+        tampilkanTersimpan();
+    } else if (page === 'settings') {
+        bukaPengaturan();
+        settingsPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}));
 //BSAwaktu
 function generateFileName() {
     const now = new Date();
@@ -678,6 +702,14 @@ const lensSelectImage = document.getElementById('lensSelectImage');
 const lensBackBtn = document.getElementById('lensBackBtn');
 const lensSelectTextBtn = document.getElementById('lensSelectTextBtn');
 const lensSelectHint = document.getElementById('lensSelectHint');
+const lensResultSheet = document.getElementById('lensResultSheet');
+const lensSelectedText = document.getElementById('lensSelectedText');
+const lensQuickCopy = document.getElementById('lensQuickCopy');
+const lensSpeak = document.getElementById('lensSpeak');
+const lensTranslate = document.getElementById('lensTranslate');
+const lensMore = document.getElementById('lensMore');
+const lensSearchPreview = document.getElementById('lensSearchPreview');
+const lensBackToSelect = document.getElementById('lensBackToSelect');
 let lensRequestId = null;
 let lensCropper = null;
 let lensImageUrl = null;
@@ -686,6 +718,8 @@ function tutupPilihAreaLens() {
     if (lensCropper) { lensCropper.destroy(); lensCropper = null; }
     lensSelectModal?.classList.remove('active');
     lensSelectModal?.setAttribute('aria-hidden', 'true');
+    if (lensResultSheet) lensResultSheet.hidden = true;
+    if (lensSelectTextBtn) { lensSelectTextBtn.hidden = false; lensSelectTextBtn.disabled = false; lensSelectTextBtn.textContent = 'Pilih teks'; }
     if (lensImageUrl) { URL.revokeObjectURL(lensImageUrl); lensImageUrl = null; }
     lensChooseBtn.disabled = false;
 }
@@ -710,6 +744,8 @@ lensImageInput?.addEventListener('change', () => {
         if (lensCropper) lensCropper.destroy();
         lensSelectModal.classList.add('active');
         lensSelectModal.setAttribute('aria-hidden', 'false');
+        if (lensResultSheet) lensResultSheet.hidden = true;
+        lensSelectTextBtn.hidden = false;
         lensCropper = new Cropper(lensSelectImage, {
             viewMode: 1,
             dragMode: 'crop',
@@ -771,16 +807,62 @@ lensSelectTextBtn?.addEventListener('click', async () => {
 
 window.onBsaOcrResult = (requestId, recognizedText, errorMessage) => {
     if (requestId !== lensRequestId) return;
-    tutupPilihAreaLens();
     if (errorMessage) {
         lensStatus.textContent = 'Gagal membaca gambar: ' + errorMessage;
+        lensSelectHint.textContent = 'Gagal membaca teks. Silakan coba lagi.';
+        lensSelectTextBtn.disabled = false;
+        lensSelectTextBtn.textContent = 'Pilih teks';
         return;
     }
-    lensResult.value = recognizedText || '';
-    lensStatus.textContent = recognizedText
-        ? 'Selesai. Teks dari area pilihan berhasil dibaca. Periksa kembali hasilnya.'
-        : 'Tulisan belum ditemukan di area pilihan. Coba perluas kotak seleksi.';
+    const result = (recognizedText || '').trim();
+    lensResult.value = result;
+    lensSelectedText.value = result;
+    lensSearchPreview.textContent = result || 'Tidak ada teks yang ditemukan';
+    lensStatus.textContent = result
+        ? 'Teks berhasil dikenali dari area yang dipilih.'
+        : 'Tulisan belum ditemukan. Coba perluas kotak seleksi.';
+    if (result) {
+        if (lensCropper) { lensCropper.destroy(); lensCropper = null; }
+        lensSelectTextBtn.hidden = true;
+        lensResultSheet.hidden = false;
+        lensSelectHint.textContent = 'Teks terpilih. Salin, dengarkan, atau terjemahkan.';
+    } else {
+        lensSelectTextBtn.disabled = false;
+        lensSelectTextBtn.textContent = 'Pilih teks';
+    }
 };
+
+lensQuickCopy?.addEventListener('click', async () => {
+    const value = lensSelectedText.value.trim();
+    if (!value) return;
+    try { await navigator.clipboard.writeText(value); }
+    catch (_) { lensSelectedText.focus(); lensSelectedText.select(); document.execCommand('copy'); }
+    lensSelectHint.textContent = 'Teks berhasil disalin.';
+});
+lensSpeak?.addEventListener('click', () => {
+    const value = lensSelectedText.value.trim();
+    if (!value || !('speechSynthesis' in window)) { lensSelectHint.textContent = 'Fitur dengarkan tidak tersedia di perangkat ini.'; return; }
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(new SpeechSynthesisUtterance(value));
+});
+lensTranslate?.addEventListener('click', () => {
+    const value = lensSelectedText.value.trim();
+    if (!value) return;
+    window.open('https://translate.google.com/?sl=auto&tl=id&text=' + encodeURIComponent(value) + '&op=translate', '_blank');
+});
+lensMore?.addEventListener('click', () => {
+    lensSelectedText.removeAttribute('readonly');
+    lensSelectedText.focus();
+    lensSelectHint.textContent = 'Mode edit teks aktif.';
+});
+lensBackToSelect?.addEventListener('click', () => {
+    lensResultSheet.hidden = true;
+    lensSelectTextBtn.hidden = false;
+    lensSelectTextBtn.disabled = false;
+    lensSelectTextBtn.textContent = 'Pilih teks';
+    if (lensCropper) lensCropper.destroy();
+    lensCropper = new Cropper(lensSelectImage, { viewMode: 1, dragMode: 'crop', autoCrop: true, autoCropArea: 0.62, responsive: true, background: false, movable: true, zoomable: true, guides: true, center: true, cropBoxMovable: true, cropBoxResizable: true, toggleDragModeOnDblclick: false });
+});
 
 lensCopyBtn?.addEventListener('click', async () => {
     const value = lensResult.value.trim();
