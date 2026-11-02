@@ -306,41 +306,68 @@ private val sdCardFolderPicker = registerForActivityResult(
         fun listImages(requestedLocation: String): String {
             return try {
                 val result = org.json.JSONArray()
-                val files: List<Pair<String, ByteArray>> = if (requestedLocation == "sdcard") {
+                val imageFiles = mutableListOf<Pair<String, ByteArray>>()
+
+                if (requestedLocation == "sdcard") {
                     val prefs = getSharedPreferences("bsa_settings", MODE_PRIVATE)
                     val treeUriString = prefs.getString("sdcard_tree_uri", null)
-                        ?: return org.json.JSONObject().put("error", "Folder SD Card belum dipilih").toString()
+                        ?: return org.json.JSONObject()
+                            .put("error", "Folder Kartu SD belum dipilih. Buka Pengaturan lalu pilih folder.")
+                            .toString()
                     val treeUri = Uri.parse(treeUriString)
-                    val hasPermission = contentResolver.persistedUriPermissions.any {
-                        it.uri == treeUri && it.isReadPermission
-                    }
-                    if (!hasPermission) {
-                        return org.json.JSONObject().put("error", "Izin baca folder SD Card tidak tersedia. Pilih ulang folder SD Card di Pengaturan.").toString()
-                    }
-                    val tree = DocumentFile.fromTreeUri(this@MainActivity, treeUri)
-                        ?: return org.json.JSONObject().put("error", "Folder SD Card tidak dapat dibuka").toString()
 
-                    // Baca file gambar langsung di folder yang dipilih dan satu tingkat subfolder BSA.
-                    val candidates = mutableListOf<DocumentFile>()
-                    tree.listFiles().forEach { entry ->
-                        if (entry.isFile && entry.name?.substringAfterLast('.', "")?.lowercase() in listOf("png", "jpg", "jpeg", "webp")) {
-                            candidates.add(entry)
-                        } else if (entry.isDirectory) {
-                            entry.listFiles().filter { child ->
-                                child.isFile && child.name?.substringAfterLast('.', "")?.lowercase() in listOf("png", "jpg", "jpeg", "webp")
-                            }.forEach { candidates.add(it) }
+                    // Jangan membandingkan Uri secara mentah saja. Beberapa penyedia dokumen
+                    // mengembalikan representasi Uri yang berbeda meski menunjuk folder yang sama.
+                    val persisted = contentResolver.persistedUriPermissions.any { permission ->
+                        permission.isReadPermission &&
+                            permission.uri.authority == treeUri.authority &&
+                            permission.uri.toString().trimEnd('/') == treeUri.toString().trimEnd('/')
+                    }
+                    if (!persisted) {
+                        return org.json.JSONObject()
+                            .put("error", "Izin baca Kartu SD belum tersimpan. Pilih ulang folder Kartu SD di Pengaturan.")
+                            .toString()
+                    }
+
+                    val tree = DocumentFile.fromTreeUri(this@MainActivity, treeUri)
+                        ?: return org.json.JSONObject().put("error", "Folder Kartu SD tidak dapat dibuka. Pilih ulang foldernya.").toString()
+                    if (!tree.canRead()) {
+                        return org.json.JSONObject().put("error", "Android tidak memberikan izin baca pada folder ini. Pilih folder lain.").toString()
+                    }
+
+                    fun collectImages(folder: DocumentFile, depth: Int) {
+                        folder.listFiles().forEach { entry ->
+                            if (entry.isFile) {
+                                val ext = entry.name?.substringAfterLast('.', "")?.lowercase()
+                                if (ext in listOf("png", "jpg", "jpeg", "webp")) {
+                                    try {
+                                        contentResolver.openInputStream(entry.uri)?.use { input ->
+                                            imageFiles.add((entry.name ?: "Gambar") to input.readBytes())
+                                        }
+                                    } catch (readError: Exception) {
+                                        android.util.Log.w("BSA-Koleksi", "Gagal membaca ${entry.name}", readError)
+                                    }
+                                }
+                            } else if (entry.isDirectory && depth < 2 &&
+                                (depth == 0 || entry.name.equals("BSA", ignoreCase = true))) {
+                                collectImages(entry, depth + 1)
+                            }
                         }
                     }
-                    candidates.sortedByDescending { it.lastModified() }.mapNotNull { doc ->
-                        try { contentResolver.openInputStream(doc.uri)?.use { doc.name.orEmpty() to it.readBytes() } } catch (_: Exception) { null }
-                    }
+                    collectImages(tree, 0)
                 } else {
                     val folder = File(filesDir, "BSA")
+                    if (folder.exists() && !folder.isDirectory) {
+                        return org.json.JSONObject().put("error", "Lokasi penyimpanan internal BSA tidak valid.").toString()
+                    }
                     folder.listFiles()?.filter {
                         it.isFile && it.extension.lowercase() in listOf("png", "jpg", "jpeg", "webp")
-                    }?.sortedByDescending { it.lastModified() }?.map { it.name to it.readBytes() } ?: emptyList()
+                    }?.sortedByDescending { it.lastModified() }?.forEach { file ->
+                        imageFiles.add(file.name to file.readBytes())
+                    }
                 }
-                files.forEach { (name, bytes) ->
+
+                imageFiles.forEach { (name, bytes) ->
                     val item = JSONObject()
                     item.put("id", name)
                     item.put("name", name)
@@ -355,7 +382,9 @@ private val sdCardFolderPicker = registerForActivityResult(
                 result.toString()
             } catch (error: Exception) {
                 android.util.Log.e("BSA-Koleksi", "Gagal membaca lokasi $requestedLocation", error)
-                org.json.JSONObject().put("error", error.message ?: "Gagal membaca folder").toString()
+                org.json.JSONObject()
+                    .put("error", "Gagal membaca penyimpanan: ${error.message ?: "izin atau folder tidak tersedia"}")
+                    .toString()
             }
         }
 

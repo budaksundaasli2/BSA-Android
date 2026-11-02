@@ -166,7 +166,7 @@ function ambilDaftarKoleksi() {
         try { return JSON.parse(window.AndroidBridge.listImages(localStorage.getItem('bsa_storage_location') || 'internal') || '[]'); }
         catch (error) {
             console.error('Gagal membaca folder BSA:', error);
-            return { error: 'Koleksi tidak dapat membaca penyimpanan. Periksa izin folder di Pengaturan.' };
+            return { error: 'Koleksi gagal menghubungi penyimpanan Android. Tutup Koleksi, buka kembali, lalu periksa izin folder di Pengaturan.' };
         }
     }
     return JSON.parse(localStorage.getItem('bsaTersimpan') || '[]').map((dataUrl, i) => ({ id: String(i), dataUrl, name: 'Gambar BSA' }));
