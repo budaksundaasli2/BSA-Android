@@ -1,6 +1,7 @@
 package id.bsa.app
 
 import android.Manifest
+import android.util.Base64
 import android.app.Activity
 import android.content.ClipData
 import android.content.ContentValues
