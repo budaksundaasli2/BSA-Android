@@ -158,34 +158,36 @@ function buatModalTersimpan() {
     return modalTersimpan;
 }
 
+function ambilDaftarKoleksi() {
+    if (window.AndroidBridge && typeof window.AndroidBridge.listImages === 'function') {
+        try { return JSON.parse(window.AndroidBridge.listImages(localStorage.getItem('bsa_storage_location') || 'internal') || '[]'); }
+        catch (error) { console.error('Gagal membaca folder BSA:', error); }
+    }
+    return JSON.parse(localStorage.getItem('bsaTersimpan') || '[]').map((dataUrl, i) => ({ id: String(i), dataUrl, name: 'Gambar BSA' }));
+}
+
 function tampilkanTersimpan() {
     const modal = buatModalTersimpan();
     const listDiv = modal.querySelector('#listTersimpan');
     listDiv.innerHTML = '';
-    const data = JSON.parse(localStorage.getItem('bsaTersimpan') || '[]');
-    const emptyMessage = modal.querySelector('#emptyTersimpan');
+    const data = ambilDaftarKoleksi();
     if (data.length === 0) {
-        listDiv.innerHTML = '';
-        if (emptyMessage) emptyMessage.hidden = false;
+        listDiv.innerHTML = '<div style="grid-column:1/-1;color:#aaa;text-align:center;padding:24px 8px;">Belum ada gambar di lokasi penyimpanan BSA.</div>';
     } else {
-        if (emptyMessage) emptyMessage.hidden = true;
-        data.forEach((img, i) => {
-            const wrap = document.createElement('div');
-            wrap.style.display = 'flex';
-            wrap.style.flexDirection = 'column';
-            wrap.style.alignItems = 'center';
-            wrap.style.minWidth = '0';
-            wrap.innerHTML = `<img src="${img}" style="width:100%;aspect-ratio:1;object-fit:cover;border:1px solid #ccc;border-radius:8px;cursor:pointer;" data-index="${i}"/>`;
-            wrap.querySelector('img').onclick = function() {
-                tampilkanModalGambarTersimpan(img, i);
-            };
-            listDiv.appendChild(wrap);
+        data.forEach((item, i) => {
+            const image = document.createElement('img');
+            image.src = item.dataUrl;
+            image.alt = item.name || 'Gambar BSA';
+            image.style.cssText = 'width:100%;aspect-ratio:1;object-fit:cover;border:1px solid #ccc;border-radius:8px;cursor:pointer;';
+            image.onclick = () => tampilkanModalGambarTersimpan(item, i);
+            listDiv.appendChild(image);
         });
     }
     modal.style.display = 'flex';
 }
 
-function tampilkanModalGambarTersimpan(img, index) {
+function tampilkanModalGambarTersimpan(item, index) {
+    const img = typeof item === 'string' ? item : item.dataUrl;
     let modalGambar = document.getElementById('modalGambarTersimpan');
     if (!modalGambar) {
         modalGambar = document.createElement('div');
@@ -227,9 +229,13 @@ function tampilkanModalGambarTersimpan(img, index) {
         document.body.removeChild(link);
     };
     modalGambar.querySelector('#hapusGambarTersimpan').onclick = function() {
-        let data = JSON.parse(localStorage.getItem('bsaTersimpan') || '[]');
-        data.splice(index, 1);
-        localStorage.setItem('bsaTersimpan', JSON.stringify(data));
+        if (window.AndroidBridge && typeof window.AndroidBridge.deleteImage === 'function' && typeof item !== 'string') {
+            if (!window.AndroidBridge.deleteImage(String(item.id), localStorage.getItem('bsa_storage_location') || 'internal')) { alert('Gambar gagal dihapus dari penyimpanan.'); return; }
+        } else {
+            let data = JSON.parse(localStorage.getItem('bsaTersimpan') || '[]');
+            data.splice(index, 1);
+            localStorage.setItem('bsaTersimpan', JSON.stringify(data));
+        }
         modalGambar.style.display = 'none';
         tampilkanTersimpan();
     };
@@ -664,7 +670,7 @@ saveBtn.addEventListener("click", async () => {
             try { generateImage(resolve); } catch (error) { reject(error); }
         });
         await unduhGambar(imageData);
-        simpanKeTersimpan(imageData);
+        if (!(window.AndroidBridge && typeof window.AndroidBridge.saveImage === 'function')) simpanKeTersimpan(imageData);
     } catch (error) {
         console.error('Unduhan BSA gagal:', error);
         alert(error.message || 'Gagal mengunduh gambar. Silakan coba lagi.');
@@ -685,7 +691,7 @@ downloadBtn.addEventListener("click", async () => {
         });
         previewImage.src = imageData;
         await unduhGambar(imageData);
-        simpanKeTersimpan(imageData);
+        if (!(window.AndroidBridge && typeof window.AndroidBridge.saveImage === 'function')) simpanKeTersimpan(imageData);
         previewModal.style.display = "none";
     } catch (error) {
         console.error('Unduhan preview BSA gagal:', error);

@@ -303,6 +303,49 @@ private val sdCardFolderPicker = registerForActivityResult(
         }
 
         @JavascriptInterface
+        fun listImages(requestedLocation: String): String {
+            return try {
+                val result = org.json.JSONArray()
+                val files: List<Pair<String, ByteArray>> = if (requestedLocation == "sdcard") {
+                    val treeUri = getSharedPreferences("bsa_settings", MODE_PRIVATE).getString("sdcard_tree_uri", null)
+                        ?: return "[]"
+                    val tree = DocumentFile.fromTreeUri(this@MainActivity, Uri.parse(treeUri)) ?: return "[]"
+                    tree.listFiles().filter { it.isFile && it.name?.endsWith(".png", true) == true }.mapNotNull { doc ->
+                        try { contentResolver.openInputStream(doc.uri)?.use { doc.name.orEmpty() to it.readBytes() } } catch (_: Exception) { null }
+                    }
+                } else {
+                    val folder = File(filesDir, "BSA")
+                    folder.listFiles()?.filter { it.isFile && it.extension.equals("png", true) }
+                        ?.sortedByDescending { it.lastModified() }
+                        ?.map { it.name to it.readBytes() } ?: emptyList()
+                }
+                files.forEach { (name, bytes) ->
+                    val item = JSONObject()
+                    item.put("id", name)
+                    item.put("name", name)
+                    item.put("dataUrl", "data:image/png;base64," + Base64.encodeToString(bytes, Base64.NO_WRAP))
+                    result.put(item)
+                }
+                result.toString()
+            } catch (_: Exception) { "[]" }
+        }
+
+        @JavascriptInterface
+        fun deleteImage(imageId: String, requestedLocation: String): Boolean {
+            return try {
+                if (requestedLocation == "sdcard") {
+                    val treeUri = getSharedPreferences("bsa_settings", MODE_PRIVATE).getString("sdcard_tree_uri", null) ?: return false
+                    val tree = DocumentFile.fromTreeUri(this@MainActivity, Uri.parse(treeUri)) ?: return false
+                    tree.findFile(imageId)?.delete() == true
+                } else {
+                    val safeName = File(imageId).name
+                    val file = File(File(filesDir, "BSA"), safeName)
+                    file.isFile && file.delete()
+                }
+            } catch (_: Exception) { false }
+        }
+
+        @JavascriptInterface
         fun saveImage(dataUrl: String, requestedName: String, requestedLocation: String): Boolean {
             return try {
                 require(dataUrl.startsWith("data:image/png;base64,")) {
