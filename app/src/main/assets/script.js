@@ -145,6 +145,10 @@ function buatModalTersimpan() {
                 <svg width=\"28\" height=\"28\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M19 21L12 17L5 21V5C5 4.44772 5.44772 4 6 4H18C18.5523 4 19 4.44772 19 5V21Z\" stroke=\"#fff\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>
             </div>
             <div id=\"listTersimpan\" style=\"display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;width:100%;\"></div>
+            <div id=\"koleksiLoading\" class=\"koleksi-loading\" role=\"status\" aria-live=\"polite\">
+                <span class=\"koleksi-spinner\"></span>
+                <span>Memuat gambar...</span>
+            </div>
             <button id=\"closeTersimpan\" style=\"margin:32px auto 0 auto;display:block;background:none;border:none;\">
                 <svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><circle cx=\"12\" cy=\"12\" r=\"10\" stroke=\"#fff\" stroke-width=\"2\"/><path d=\"M15 9L9 15M9 9l6 6\" stroke=\"#fff\" stroke-width=\"2\" stroke-linecap=\"round\"/></svg>
             </button>
@@ -166,24 +170,39 @@ function ambilDaftarKoleksi() {
     return JSON.parse(localStorage.getItem('bsaTersimpan') || '[]').map((dataUrl, i) => ({ id: String(i), dataUrl, name: 'Gambar BSA' }));
 }
 
-function tampilkanTersimpan() {
+async function tampilkanTersimpan() {
     const modal = buatModalTersimpan();
     const listDiv = modal.querySelector('#listTersimpan');
+    const loading = modal.querySelector('#koleksiLoading');
     listDiv.innerHTML = '';
-    const data = ambilDaftarKoleksi();
-    if (data.length === 0) {
-        listDiv.innerHTML = '<div style="grid-column:1/-1;color:#aaa;text-align:center;padding:24px 8px;">Belum ada gambar di lokasi penyimpanan BSA.</div>';
-    } else {
-        data.forEach((item, i) => {
-            const image = document.createElement('img');
-            image.src = item.dataUrl;
-            image.alt = item.name || 'Gambar BSA';
-            image.style.cssText = 'width:100%;aspect-ratio:1;object-fit:cover;border:1px solid #ccc;border-radius:8px;cursor:pointer;';
-            image.onclick = () => tampilkanModalGambarTersimpan(item, i);
-            listDiv.appendChild(image);
-        });
-    }
+    loading.style.display = 'flex';
     modal.style.display = 'flex';
+    await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 40)));
+    try {
+        const data = ambilDaftarKoleksi();
+        if (!data || data.length === 0) {
+            listDiv.innerHTML = '<div style="grid-column:1/-1;color:#aaa;text-align:center;padding:24px 8px;">Belum ada gambar di lokasi penyimpanan BSA.</div>';
+            return;
+        }
+        const waits = data.map((item, i) => new Promise(resolve => {
+            const image = document.createElement('img');
+            image.alt = item.name || 'Gambar BSA';
+            image.loading = 'eager';
+            image.style.cssText = 'width:100%;aspect-ratio:1;object-fit:cover;border:1px solid #ccc;border-radius:8px;cursor:pointer;background:#222;';
+            image.onclick = () => tampilkanModalGambarTersimpan(item, i);
+            image.onload = resolve;
+            image.onerror = resolve;
+            listDiv.appendChild(image);
+            image.src = item.dataUrl;
+            if (image.complete) resolve();
+        }));
+        await Promise.all(waits);
+    } catch (error) {
+        console.error('Gagal memuat gambar koleksi:', error);
+        listDiv.innerHTML = '<div style="grid-column:1/-1;color:#ff8a8a;text-align:center;padding:24px 8px;">Gambar gagal dimuat. Periksa izin dan lokasi penyimpanan.</div>';
+    } finally {
+        loading.style.display = 'none';
+    }
 }
 
 function tampilkanModalGambarTersimpan(item, index) {
@@ -320,8 +339,11 @@ async function unduhGambar(imageData) {
 
     const fileName = generateFileName();
     if (window.AndroidBridge && typeof window.AndroidBridge.saveImage === 'function') {
-        const berhasil = window.AndroidBridge.saveImage(imageData, fileName, localStorage.getItem('bsa_storage_location') || 'internal');
-        if (!berhasil) throw new Error('Android gagal menyimpan gambar. Periksa ruang penyimpanan lalu coba lagi.');
+        const hasilSimpan = window.AndroidBridge.saveImage(imageData, fileName, localStorage.getItem('bsa_storage_location') || 'internal');
+        if (hasilSimpan !== 'OK') {
+            const detail = String(hasilSimpan || '').replace(/^ERROR:\s*/, '');
+            throw new Error(detail || 'Android gagal menyimpan gambar. Periksa lokasi dan ruang penyimpanan.');
+        }
         return;
     }
 

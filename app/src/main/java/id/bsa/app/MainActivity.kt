@@ -346,15 +346,13 @@ private val sdCardFolderPicker = registerForActivityResult(
         }
 
         @JavascriptInterface
-        fun saveImage(dataUrl: String, requestedName: String, requestedLocation: String): Boolean {
+        fun saveImage(dataUrl: String, requestedName: String, requestedLocation: String): String {
             return try {
                 require(dataUrl.startsWith("data:image/png;base64,")) {
                     "Format gambar bukan PNG"
                 }
                 val encoded = dataUrl.substringAfter(",", "")
-                require(encoded.isNotBlank() && encoded.length <= 25_000_000) {
-                    "Ukuran gambar tidak valid"
-                }
+                require(encoded.isNotBlank()) { "Data gambar kosong" }
                 val bytes = Base64.decode(encoded, Base64.DEFAULT)
                 val safeName = requestedName
                     .replace(Regex("[^A-Za-z0-9._-]"), "_")
@@ -367,7 +365,15 @@ private val sdCardFolderPicker = registerForActivityResult(
                     if (!directory.exists() && !directory.mkdirs()) {
                         error("Folder penyimpanan internal tidak dapat dibuat")
                     }
-                    File(directory, safeName).writeBytes(bytes)
+                    val output = File(directory, safeName)
+                    val temporary = File(directory, "$safeName.tmp")
+                    temporary.outputStream().use { stream -> stream.write(bytes); stream.flush() }
+                    if (output.exists() && !output.delete()) error("File lama tidak dapat diganti")
+                    if (!temporary.renameTo(output)) {
+                        temporary.copyTo(output, overwrite = true)
+                        temporary.delete()
+                    }
+                    if (!output.exists() || output.length() != bytes.size.toLong()) error("Verifikasi file hasil simpan gagal")
                 } else if (useSdCard) {
                     val treeUriString = getSharedPreferences("bsa_settings", MODE_PRIVATE)
                         .getString("sdcard_tree_uri", null)
@@ -419,7 +425,7 @@ private val sdCardFolderPicker = registerForActivityResult(
                         Toast.LENGTH_LONG
                     ).show()
                 }
-                true
+                "OK"
             } catch (error: Exception) {
                 runOnUiThread {
                     Toast.makeText(
@@ -428,7 +434,7 @@ private val sdCardFolderPicker = registerForActivityResult(
                         Toast.LENGTH_LONG
                     ).show()
                 }
-                false
+                "ERROR: ${error.message ?: "Kesalahan penyimpanan tidak diketahui"}"
             }
         }
     }
