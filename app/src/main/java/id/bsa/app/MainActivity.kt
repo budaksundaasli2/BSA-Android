@@ -330,22 +330,50 @@ private val sdCardFolderPicker = registerForActivityResult(
                     .replace(Regex("[^A-Za-z0-9._-]"), "_")
                     .let { if (it.endsWith(".png", ignoreCase = true)) it else "$it.png" }
 
-                val useInternalStorage = requestedLocation == "internal"
-                val useSdCard = requestedLocation == "sdcard"
+                val normalizedLocation = requestedLocation.trim().lowercase()
+                val useInternalStorage = normalizedLocation == "internal" || normalizedLocation.isBlank()
+                val useSdCard = normalizedLocation == "sdcard"
                 if (useInternalStorage) {
+                    // Penyimpanan internal privat aplikasi: tidak membutuhkan izin storage Android.
                     val directory = File(filesDir, "BSA")
                     if (!directory.exists() && !directory.mkdirs()) {
-                        error("Folder penyimpanan internal tidak dapat dibuat")
+                        error("Folder internal BSA tidak dapat dibuat: ${directory.absolutePath}")
                     }
+                    if (!directory.isDirectory || !directory.canWrite()) {
+                        error("Folder internal BSA tidak memiliki akses tulis")
+                    }
+
                     val output = File(directory, safeName)
-                    val temporary = File(directory, "$safeName.tmp")
-                    temporary.outputStream().use { stream -> stream.write(bytes); stream.flush() }
-                    if (output.exists() && !output.delete()) error("File lama tidak dapat diganti")
-                    if (!temporary.renameTo(output)) {
-                        temporary.copyTo(output, overwrite = true)
-                        temporary.delete()
+                    val temporary = File(directory, ".$safeName.tmp")
+                    try {
+                        java.io.FileOutputStream(temporary).use { stream ->
+                            stream.write(bytes)
+                            stream.flush()
+                            stream.fd.sync()
+                        }
+                        if (!temporary.exists() || temporary.length() != bytes.size.toLong()) {
+                            error("Data sementara gagal ditulis lengkap")
+                        }
+                        if (output.exists() && !output.delete()) {
+                            error("File lama tidak dapat diganti: ${output.name}")
+                        }
+                        if (!temporary.renameTo(output)) {
+                            // Fallback jika filesystem tidak mendukung rename atomik.
+                            java.io.FileInputStream(temporary).use { input ->
+                                java.io.FileOutputStream(output).use { stream ->
+                                    input.copyTo(stream)
+                                    stream.flush()
+                                    stream.fd.sync()
+                                }
+                            }
+                            temporary.delete()
+                        }
+                        if (!output.isFile || output.length() != bytes.size.toLong()) {
+                            error("Verifikasi hasil unduhan gagal")
+                        }
+                    } finally {
+                        if (temporary.exists()) temporary.delete()
                     }
-                    if (!output.exists() || output.length() != bytes.size.toLong()) error("Verifikasi file hasil simpan gagal")
                 } else if (useSdCard) {
                     val treeUriString = getSharedPreferences("bsa_settings", MODE_PRIVATE)
                         .getString("sdcard_tree_uri", null)
