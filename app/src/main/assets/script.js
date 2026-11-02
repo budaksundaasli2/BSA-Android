@@ -257,10 +257,10 @@ function tutupKoleksi() {
 }
 
 function bukaHome() {
-    tutupPengaturan();
-    tutupKoleksi();
-    setBsaNav('home');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Home selalu mengembalikan aplikasi ke kondisi awal dengan memuat ulang halaman.
+    // Preferensi yang disimpan di localStorage (tema, watermark, lokasi penyimpanan)
+    // tetap dipertahankan setelah halaman dimuat ulang.
+    window.location.reload();
 }
 
 bsaNavItems.forEach(item => {

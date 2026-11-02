@@ -638,3 +638,7 @@ body.light-mode .bsa-nav-item.active { color: #1558a6; background: #e8f1ff; }
 .lens-result-tabs strong { color: #fff; border-bottom: 2px solid #8bb8ff; padding-bottom: 6px; }
 .lens-again { width: 100%; border: 1px solid #51545e; border-radius: 24px; padding: 12px; background: transparent; color: #e9eaf0; font-weight: 600; }
 @media (max-width: 380px) { .lens-result-actions button { padding: 10px 11px; font-size: 13px; } }
+
+/* Home navigation fix: keep bottom navigation interactive above page content. */
+.bsa-bottom-nav { z-index: 10000; pointer-events: auto; }
+.bsa-nav-item { pointer-events: auto; touch-action: manipulation; }
