@@ -547,3 +547,21 @@ body.light-mode .settings-panel {
     font-size: 12px;
     text-align: center;
 }
+
+
+/* BSA Lens OCR */
+.lens-panel { width:100%; margin:16px 0; padding:16px; border:1px solid #444; border-radius:14px; background:#202020; color:#fff; }
+.lens-heading { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+.lens-icon { display:grid; place-items:center; width:42px; height:42px; border-radius:12px; background:#303f68; color:#fff; font-size:28px; }
+.lens-heading h2 { margin:0 0 4px; font-size:18px; }
+.lens-heading p, .lens-status { margin:0; color:#bbb; font-size:12px; line-height:1.5; }
+.lens-panel textarea { display:block; box-sizing:border-box; width:100%; min-height:125px; margin:10px 0; padding:12px; border:1px solid #555; border-radius:10px; background:#111; color:#fff; font:inherit; font-size:14px; resize:vertical; }
+.lens-panel button { min-height:42px; padding:10px 12px; border-radius:9px; }
+.lens-primary { width:100%; background:#315ca8; }
+.lens-actions { display:flex; gap:8px; }
+.lens-actions button { flex:1; background:#383838; }
+.lens-panel button:disabled { opacity:.55; }
+body.light-mode .lens-panel { background:#fff; color:#171717; border-color:#ddd; }
+body.light-mode .lens-heading p, body.light-mode .lens-status { color:#555; }
+body.light-mode .lens-panel textarea { background:#f7f7f7; color:#171717; border-color:#ccc; }
+body.light-mode .lens-actions button { background:#e8e8e8; color:#171717; }

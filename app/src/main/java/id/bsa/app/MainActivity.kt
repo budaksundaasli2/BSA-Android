@@ -13,6 +13,13 @@ import android.os.Environment
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Base64
+import android.graphics.BitmapFactory
+import org.json.JSONObject
+import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.text.TextRecognition
+import com.google.mlkit.vision.text.TextRecognizer
+import com.google.mlkit.vision.text.latin.TextRecognizerOptions
+import java.util.concurrent.Executors
 import android.webkit.*
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -30,6 +37,7 @@ class MainActivity : ComponentActivity() {
     private var pendingCameraUri: Uri? = null
     private var pendingCameraFile: File? = null
     private var pendingNativeCameraPermission = false
+    private val ocrExecutor = Executors.newSingleThreadExecutor()
 
     private val sdCardFolderPicker = registerForActivityResult(
         ActivityResultContracts.OpenDocumentTree()
@@ -283,6 +291,54 @@ class MainActivity : ComponentActivity() {
     /** Bridge untuk pengaturan dan penyimpanan gambar aplikasi. */
     private inner class AndroidDownloadBridge {
         @JavascriptInterface
+        fun recognizeText(encodedImage: String, callbackId: String) {
+            if (encodedImage.length > 18_000_000) {
+                sendOcrResult(callbackId, "", "Ukuran gambar terlalu besar")
+                return
+            }
+            ocrExecutor.execute {
+                var recognizer: TextRecognizer? = null
+                var bitmap: android.graphics.Bitmap? = null
+                try {
+                    val imageBytes = Base64.decode(encodedImage, Base64.DEFAULT)
+                    val decodedBitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+                        ?: error("Format gambar tidak dapat dibaca")
+                    bitmap = decodedBitmap
+                    val inputImage = InputImage.fromBitmap(decodedBitmap, 0)
+                    val localRecognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+                    recognizer = localRecognizer
+                    localRecognizer.process(inputImage)
+                        .addOnSuccessListener { result ->
+                            sendOcrResult(callbackId, result.text, null)
+                            decodedBitmap.recycle()
+                            localRecognizer.close()
+                        }
+                        .addOnFailureListener { error ->
+                            sendOcrResult(callbackId, "", error.localizedMessage ?: "Tidak dapat membaca tulisan")
+                            decodedBitmap.recycle()
+                            localRecognizer.close()
+                        }
+                } catch (error: Exception) {
+                    bitmap?.takeIf { !it.isRecycled }?.recycle()
+                    recognizer?.close()
+                    sendOcrResult(callbackId, "", error.localizedMessage ?: "Gambar tidak dapat diproses")
+                }
+            }
+        }
+
+        private fun sendOcrResult(callbackId: String, recognizedText: String, errorMessage: String?) {
+            val safeId = JSONObject.quote(callbackId)
+            val safeText = JSONObject.quote(recognizedText)
+            val safeError = if (errorMessage == null) "null" else JSONObject.quote(errorMessage)
+            runOnUiThread {
+                webView.evaluateJavascript(
+                    "window.onBsaOcrResult && window.onBsaOcrResult($safeId, $safeText, $safeError)",
+                    null
+                )
+            }
+        }
+
+        @JavascriptInterface
         fun chooseSdCardFolder() {
             runOnUiThread { pilihFolderSdCard() }
         }
@@ -386,6 +442,7 @@ class MainActivity : ComponentActivity() {
             webView.loadUrl("about:blank")
             webView.destroy()
         }
+        ocrExecutor.shutdown()
         super.onDestroy()
     }
 }

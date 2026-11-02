@@ -664,3 +664,85 @@ previewModal.addEventListener("click", (e) => {
 });
 
 window.addEventListener('pagehide', hentikanKamera);
+
+
+/* BSA Lens: OCR teks dari gambar dengan Google ML Kit di perangkat. */
+const lensImageInput = document.getElementById('lensImageInput');
+const lensChooseBtn = document.getElementById('lensChooseBtn');
+const lensStatus = document.getElementById('lensStatus');
+const lensResult = document.getElementById('lensResult');
+const lensCopyBtn = document.getElementById('lensCopyBtn');
+const lensInsertBtn = document.getElementById('lensInsertBtn');
+let lensRequestId = null;
+
+lensChooseBtn?.addEventListener('click', () => lensImageInput?.click());
+lensImageInput?.addEventListener('change', async () => {
+    const file = lensImageInput.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+        lensStatus.textContent = 'File harus berupa gambar.';
+        lensImageInput.value = '';
+        return;
+    }
+    if (!window.AndroidBridge?.recognizeText) {
+        lensStatus.textContent = 'Fitur Lens hanya tersedia di aplikasi Android BSA.';
+        lensImageInput.value = '';
+        return;
+    }
+
+    lensChooseBtn.disabled = true;
+    lensStatus.textContent = 'Sedang membaca tulisan...';
+    lensResult.value = '';
+    try {
+        const bitmap = await createImageBitmap(file);
+        const scale = Math.min(1, 2200 / Math.max(bitmap.width, bitmap.height));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+        canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+        canvas.getContext('2d', { alpha: false }).drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+        bitmap.close?.();
+        const encodedImage = canvas.toDataURL('image/jpeg', 0.88).split(',')[1];
+        lensRequestId = 'bsa-lens-' + Date.now();
+        window.AndroidBridge.recognizeText(encodedImage, lensRequestId);
+    } catch (error) {
+        lensStatus.textContent = 'Gambar gagal diproses: ' + (error.message || 'Kesalahan tidak diketahui');
+        lensChooseBtn.disabled = false;
+    } finally {
+        lensImageInput.value = '';
+    }
+});
+
+window.onBsaOcrResult = (requestId, recognizedText, errorMessage) => {
+    if (requestId !== lensRequestId) return;
+    lensChooseBtn.disabled = false;
+    if (errorMessage) {
+        lensStatus.textContent = 'Gagal membaca gambar: ' + errorMessage;
+        return;
+    }
+    lensResult.value = recognizedText || '';
+    lensStatus.textContent = recognizedText
+        ? 'Selesai. Periksa kembali hasil tulisan sebelum digunakan.'
+        : 'Tulisan belum ditemukan. Coba gambar yang lebih jelas.';
+};
+
+lensCopyBtn?.addEventListener('click', async () => {
+    const value = lensResult.value.trim();
+    if (!value) { lensStatus.textContent = 'Belum ada teks untuk disalin.'; return; }
+    try {
+        await navigator.clipboard.writeText(value);
+        lensStatus.textContent = 'Teks berhasil disalin.';
+    } catch (_) {
+        lensResult.focus();
+        lensResult.select();
+        const copied = document.execCommand('copy');
+        lensStatus.textContent = copied ? 'Teks berhasil disalin.' : 'Pilih teks lalu salin manual.';
+    }
+});
+
+lensInsertBtn?.addEventListener('click', () => {
+    const value = lensResult.value.trim();
+    if (!value) { lensStatus.textContent = 'Belum ada teks untuk dimasukkan.'; return; }
+    text.innerText = value;
+    lensStatus.textContent = 'Teks sudah dimasukkan ke editor BSA.';
+    text.scrollIntoView({ behavior: 'smooth', block: 'center' });
+});

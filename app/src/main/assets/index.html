@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Amaranth:wght@700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20261101-bsa17-black-icon">
+    <link rel="stylesheet" href="style.css?v=20261102-bsa-lens">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 </head>
@@ -31,6 +31,21 @@
             </div>
         </div>
 
+        <section id="lensPanel" class="lens-panel">
+            <div class="lens-heading">
+                <span class="lens-icon">⌕</span>
+                <div><h2>BSA Lens</h2><p>Salin tulisan dari gambar secara otomatis.</p></div>
+            </div>
+            <input type="file" id="lensImageInput" accept="image/*" hidden>
+            <button type="button" id="lensChooseBtn" class="lens-primary">📷 Pilih Gambar</button>
+            <p id="lensStatus" class="lens-status" aria-live="polite">Pilih gambar yang berisi tulisan.</p>
+            <textarea id="lensResult" rows="6" placeholder="Hasil tulisan akan muncul di sini..."></textarea>
+            <div class="lens-actions">
+                <button type="button" id="lensCopyBtn">Salin Teks</button>
+                <button type="button" id="lensInsertBtn">Masukkan ke Editor</button>
+            </div>
+        </section>
+
         <section id="settingsPanel" class="settings-panel" hidden>
             <h2>Pengaturan BSA</h2>
             <p class="settings-gesture-hint">Geser ke kiri untuk menutup</p>
@@ -47,7 +62,7 @@
             </select>
             <button type="button" id="chooseSdCardFolderBtn" class="settings-close" hidden>Pilih folder SD Card</button>
             <p id="storageDescription" class="setting-help">Hasil unduhan disimpan di penyimpanan internal aplikasi BSA.</p>
-            <div class="setting-version">Versi BSA <strong id="appVersion">1.8</strong></div>
+            <div class="setting-version">Versi BSA <strong id="appVersion">1.9</strong></div>
         </section>
 
         <div class="button-group" aria-label="Navigasi utama">
@@ -100,7 +115,7 @@
         </div>
     </div>
 
-    <script src="script.js?v=20261101-bsa17-black-icon"></script>
+    <script src="script.js?v=20261102-bsa-lens"></script>
     <footer class="footer">
   &copy; 2026 Budak Sunda Asli. All rights reserved.
 </footer>
