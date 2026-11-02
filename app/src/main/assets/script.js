@@ -239,7 +239,7 @@ function tampilkanModalGambarTersimpan(img, index) {
     modalGambar.style.display = 'flex';
 }
 
-// Navigasi bawah BSA: Home, Koleksi, Pengaturan.
+// Navigasi bawah BSA: Home, Koleksi, Pengaturan. Script dimuat setelah elemen nav agar ketiga tombol terdeteksi.
 const bsaNavItems = document.querySelectorAll('.bsa-nav-item');
 
 function setBsaNav(page) {
