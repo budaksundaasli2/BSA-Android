@@ -675,3 +675,6 @@ body.light-mode .bsa-nav-item.active { color: #1558a6; background: #e8f1ff; }
 .koleksi-spinner{width:23px;height:23px;border:2px solid rgba(255,255,255,.18);border-top-color:#9b8cff;border-radius:50%;animation:bsaKoleksiSpin .75s linear infinite}
 @keyframes bsaKoleksiSpin{to{transform:rotate(360deg)}}
 @media(max-width:360px){.bsa-collection-panel{padding:15px}.bsa-collection-grid{gap:8px}.bsa-collection-filename{font-size:10px}}
+
+/* Navigasi BSA setelah fitur Koleksi dihapus */
+.bsa-bottom-nav{grid-template-columns:repeat(2,minmax(0,1fr)) !important;}

@@ -284,7 +284,7 @@ function tampilkanModalGambarTersimpan(item, index) {
     modalGambar.style.display = 'flex';
 }
 
-// Navigasi bawah BSA: Home, Koleksi, Pengaturan. Script dimuat setelah elemen nav agar ketiga tombol terdeteksi.
+// Navigasi bawah BSA: Home dan Pengaturan.
 const bsaNavItems = document.querySelectorAll('.bsa-nav-item');
 
 function setBsaNav(page) {
@@ -313,10 +313,6 @@ bsaNavItems.forEach(item => {
         const page = item.dataset.page;
         if (page === 'home') {
             bukaHome();
-        } else if (page === 'collection') {
-            tutupPengaturan();
-            setBsaNav('collection');
-            tampilkanTersimpan();
         } else if (page === 'settings') {
             tutupKoleksi();
             setBsaNav('settings');
