@@ -15,7 +15,6 @@ const downloadBtn = document.getElementById("downloadBtn");
 const cancelPreviewBtn = document.getElementById("cancelPreviewBtn");
 const previewBtn = document.getElementById("previewBtn");
 const shareTiktokBtn = document.getElementById("shareTiktokBtn");
-const navHome = document.getElementById("navHome");
 const navTersimpan = document.getElementById("navTersimpan");
 let cropper = null;
 
@@ -145,7 +144,7 @@ function buatModalTersimpan() {
             <div style=\"display:flex;justify-content:center;align-items:center;margin-bottom:16px;\">
                 <svg width=\"28\" height=\"28\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M19 21L12 17L5 21V5C5 4.44772 5.44772 4 6 4H18C18.5523 4 19 4.44772 19 5V21Z\" stroke=\"#fff\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>
             </div>
-            <div id=\"listTersimpan\" style=\"display:grid;grid-template-columns:repeat(4,1fr);gap:12px;\"></div>
+            <div id=\"listTersimpan\" style=\"display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;width:100%;\"></div>
             <button id=\"closeTersimpan\" style=\"margin:32px auto 0 auto;display:block;background:none;border:none;\">
                 <svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><circle cx=\"12\" cy=\"12\" r=\"10\" stroke=\"#fff\" stroke-width=\"2\"/><path d=\"M15 9L9 15M9 9l6 6\" stroke=\"#fff\" stroke-width=\"2\" stroke-linecap=\"round\"/></svg>
             </button>
@@ -240,18 +239,48 @@ function tampilkanModalGambarTersimpan(img, index) {
     modalGambar.style.display = 'flex';
 }
 
-navHome.addEventListener('click', () => { setBsaNav('home'); tutupPengaturan(); tutupKoleksi(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
-
 // Navigasi bawah BSA: Home, Koleksi, Pengaturan.
 const bsaNavItems = document.querySelectorAll('.bsa-nav-item');
-function setBsaNav(page) { bsaNavItems.forEach(item => item.classList.toggle('active', item.dataset.page === page)); }
-function tutupKoleksi() { const modal = document.getElementById('modalTersimpan'); if (modal) modal.style.display = 'none'; }
-bsaNavItems.forEach(item => item.addEventListener('click', () => {
-    const page = item.dataset.page; setBsaNav(page);
-    if (page === 'home') { tutupPengaturan(); tutupKoleksi(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
-    else if (page === 'collection') { tutupPengaturan(); tampilkanTersimpan(); }
-    else if (page === 'settings') { tutupKoleksi(); bukaPengaturan(); settingsPanel.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
-}));
+
+function setBsaNav(page) {
+    bsaNavItems.forEach(item => {
+        item.classList.toggle('active', item.dataset.page === page);
+        item.setAttribute('aria-current', item.dataset.page === page ? 'page' : 'false');
+    });
+}
+
+function tutupKoleksi() {
+    const modal = document.getElementById('modalTersimpan');
+    if (modal) modal.style.display = 'none';
+    const modalGambar = document.getElementById('modalGambarTersimpan');
+    if (modalGambar) modalGambar.style.display = 'none';
+}
+
+function bukaHome() {
+    tutupPengaturan();
+    tutupKoleksi();
+    setBsaNav('home');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+bsaNavItems.forEach(item => {
+    item.addEventListener('click', () => {
+        const page = item.dataset.page;
+        if (page === 'home') {
+            bukaHome();
+        } else if (page === 'collection') {
+            tutupPengaturan();
+            setBsaNav('collection');
+            tampilkanTersimpan();
+        } else if (page === 'settings') {
+            tutupKoleksi();
+            setBsaNav('settings');
+            bukaPengaturan();
+            settingsPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    });
+});
+
 //BSAwaktu
 function generateFileName() {
     const now = new Date();
