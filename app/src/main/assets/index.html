@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Amaranth:wght@700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20261102-bsa-nav-lens">
+    <link rel="stylesheet" href="style.css?v=20261102-bsa-nav-home-collection-settings">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 </head>
@@ -30,23 +30,7 @@
                 <input type="file" id="cameraCaptureInput" accept="image/*" capture="environment" hidden>
             </div>
         </div>
-
-        <section id="lensPanel" class="lens-panel">
-            <div class="lens-heading">
-                <span class="lens-icon">⌕</span>
-                <div><h2>BSA Lens</h2><p>Salin tulisan dari gambar secara otomatis.</p></div>
-            </div>
-            <input type="file" id="lensImageInput" accept="image/*" hidden>
-            <button type="button" id="lensChooseBtn" class="lens-primary">📷 Pilih Gambar</button>
-            <p id="lensStatus" class="lens-status" aria-live="polite">Pilih gambar yang berisi tulisan.</p>
-            <textarea id="lensResult" rows="6" placeholder="Hasil tulisan akan muncul di sini..."></textarea>
-            <div class="lens-actions">
-                <button type="button" id="lensCopyBtn">Salin Teks</button>
-                <button type="button" id="lensInsertBtn">Masukkan ke Editor</button>
-            </div>
-        </section>
-
-        <section id="settingsPanel" class="settings-panel" hidden>
+<section id="settingsPanel" class="settings-panel" hidden>
             <h2>Pengaturan BSA</h2>
             <p class="settings-gesture-hint">Geser ke kiri untuk menutup</p>
             <label class="setting-row" for="darkModeToggle">
@@ -62,7 +46,7 @@
             </select>
             <button type="button" id="chooseSdCardFolderBtn" class="settings-close" hidden>Pilih folder SD Card</button>
             <p id="storageDescription" class="setting-help">Hasil unduhan disimpan di penyimpanan internal aplikasi BSA.</p>
-            <div class="setting-version">Versi BSA <strong id="appVersion">2.1</strong></div>
+            <div class="setting-version">Versi BSA <strong id="appVersion">2.2</strong></div>
         </section>
 
         <div class="button-group" aria-label="Navigasi utama">
@@ -114,40 +98,9 @@
             </div>
         </div>
     </div>
-
-
-
-    <!-- BSA Lens: layar pilih area teks seperti Google Lens -->
-    <div id="lensSelectModal" class="lens-select-modal" aria-hidden="true">
-        <div class="lens-select-header">
-            <button type="button" id="lensBackBtn" aria-label="Kembali">‹</button>
-            <div><strong>BSA Lens</strong><small>Geser kotak untuk memilih tulisan</small></div>
-            <span class="lens-select-spacer"></span>
-        </div>
-        <div class="lens-select-stage">
-            <img id="lensSelectImage" alt="Pilih area tulisan pada gambar">
-        </div>
-        <div class="lens-select-footer">
-            <p id="lensSelectHint">Atur kotak seleksi seperti Google Lens, lalu tekan Pilih teks.</p>
-            <button type="button" id="lensSelectTextBtn">Pilih teks</button>
-            <div id="lensResultSheet" class="lens-result-sheet" hidden>
-                <div class="lens-result-actions">
-                    <button type="button" id="lensQuickCopy">Salin</button>
-                    <button type="button" id="lensSpeak">Dengarkan</button>
-                    <button type="button" id="lensTranslate">Terjemahkan</button>
-                    <button type="button" id="lensMore">⋮</button>
-                </div>
-                <textarea id="lensSelectedText" rows="4" readonly placeholder="Teks terpilih akan muncul di sini"></textarea>
-                <div class="lens-search-row"><span class="lens-google-g">G</span><span id="lensSearchPreview">Teks hasil pilihan</span></div>
-                <div class="lens-result-tabs"><span>Mode AI</span><strong>Semua</strong><span>Gambar</span><span>Video</span></div>
-                <button type="button" id="lensBackToSelect" class="lens-again">Pilih area lain</button>
-            </div>
-        </div>
-    </div>
-\n    <script src="script.js?v=20261102-bsa-nav-lens"></script>
+\n    <script src="script.js?v=20261102-bsa-nav-home-collection-settings"></script>
     <nav class="bsa-bottom-nav" aria-label="Navigasi utama BSA">
         <button type="button" class="bsa-nav-item active" data-page="home"><span class="bsa-nav-icon">⌂</span><small>Home</small></button>
-        <button type="button" class="bsa-nav-item" data-page="lens"><span class="bsa-nav-icon">⌕</span><small>Lens</small></button>
         <button type="button" class="bsa-nav-item" data-page="collection"><span class="bsa-nav-icon">▧</span><small>Koleksi</small></button>
         <button type="button" class="bsa-nav-item" data-page="settings"><span class="bsa-nav-icon">⚙</span><small>Pengaturan</small></button>
     </nav>

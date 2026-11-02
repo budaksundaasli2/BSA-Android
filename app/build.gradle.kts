@@ -11,8 +11,8 @@ android {
         applicationId = "id.bsa.app"
         minSdk = 23
         targetSdk = 35
-        versionCode = 12
-        versionName = "2.1"
+        versionCode = 13
+        versionName = "2.2"
     }
 
     compileOptions {
@@ -28,5 +28,4 @@ dependencies {
     implementation("androidx.activity:activity-ktx:1.9.3")
     implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.documentfile:documentfile:1.0.1")
-    implementation("com.google.mlkit:text-recognition:16.0.1")
 }

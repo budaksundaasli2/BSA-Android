@@ -154,6 +154,7 @@ function buatModalTersimpan() {
     document.body.appendChild(modalTersimpan);
     modalTersimpan.querySelector('#closeTersimpan').onclick = () => {
         modalTersimpan.style.display = 'none';
+        setBsaNav('home');
     };
     return modalTersimpan;
 }
@@ -163,15 +164,19 @@ function tampilkanTersimpan() {
     const listDiv = modal.querySelector('#listTersimpan');
     listDiv.innerHTML = '';
     const data = JSON.parse(localStorage.getItem('bsaTersimpan') || '[]');
+    const emptyMessage = modal.querySelector('#emptyTersimpan');
     if (data.length === 0) {
         listDiv.innerHTML = '';
+        if (emptyMessage) emptyMessage.hidden = false;
     } else {
+        if (emptyMessage) emptyMessage.hidden = true;
         data.forEach((img, i) => {
             const wrap = document.createElement('div');
             wrap.style.display = 'flex';
             wrap.style.flexDirection = 'column';
             wrap.style.alignItems = 'center';
-            wrap.innerHTML = `<img src="${img}" style="width:100px;height:100px;object-fit:cover;border:1px solid #ccc;border-radius:8px;cursor:pointer;" data-index="${i}"/>`;
+            wrap.style.minWidth = '0';
+            wrap.innerHTML = `<img src="${img}" style="width:100%;aspect-ratio:1;object-fit:cover;border:1px solid #ccc;border-radius:8px;cursor:pointer;" data-index="${i}"/>`;
             wrap.querySelector('img').onclick = function() {
                 tampilkanModalGambarTersimpan(img, i);
             };
@@ -235,32 +240,17 @@ function tampilkanModalGambarTersimpan(img, index) {
     modalGambar.style.display = 'flex';
 }
 
-navHome.addEventListener('click', () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-});
+navHome.addEventListener('click', () => { setBsaNav('home'); tutupPengaturan(); tutupKoleksi(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
 
-// Navigasi bawah BSA: Home, Lens, Koleksi, Pengaturan.
+// Navigasi bawah BSA: Home, Koleksi, Pengaturan.
 const bsaNavItems = document.querySelectorAll('.bsa-nav-item');
-function setBsaNav(page) {
-    bsaNavItems.forEach(item => item.classList.toggle('active', item.dataset.page === page));
-}
+function setBsaNav(page) { bsaNavItems.forEach(item => item.classList.toggle('active', item.dataset.page === page)); }
+function tutupKoleksi() { const modal = document.getElementById('modalTersimpan'); if (modal) modal.style.display = 'none'; }
 bsaNavItems.forEach(item => item.addEventListener('click', () => {
-    const page = item.dataset.page;
-    setBsaNav(page);
-    if (page === 'home') {
-        tutupPengaturan();
-        document.getElementById('lensPanel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else if (page === 'lens') {
-        tutupPengaturan();
-        document.getElementById('lensPanel')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    } else if (page === 'collection') {
-        tutupPengaturan();
-        tampilkanTersimpan();
-    } else if (page === 'settings') {
-        bukaPengaturan();
-        settingsPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
+    const page = item.dataset.page; setBsaNav(page);
+    if (page === 'home') { tutupPengaturan(); tutupKoleksi(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+    else if (page === 'collection') { tutupPengaturan(); tampilkanTersimpan(); }
+    else if (page === 'settings') { tutupKoleksi(); bukaPengaturan(); settingsPanel.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
 }));
 //BSAwaktu
 function generateFileName() {
@@ -688,200 +678,3 @@ previewModal.addEventListener("click", (e) => {
 });
 
 window.addEventListener('pagehide', hentikanKamera);
-
-
-/* BSA Lens: pilih area tulisan lalu OCR dengan Google ML Kit di perangkat. */
-const lensImageInput = document.getElementById('lensImageInput');
-const lensChooseBtn = document.getElementById('lensChooseBtn');
-const lensStatus = document.getElementById('lensStatus');
-const lensResult = document.getElementById('lensResult');
-const lensCopyBtn = document.getElementById('lensCopyBtn');
-const lensInsertBtn = document.getElementById('lensInsertBtn');
-const lensSelectModal = document.getElementById('lensSelectModal');
-const lensSelectImage = document.getElementById('lensSelectImage');
-const lensBackBtn = document.getElementById('lensBackBtn');
-const lensSelectTextBtn = document.getElementById('lensSelectTextBtn');
-const lensSelectHint = document.getElementById('lensSelectHint');
-const lensResultSheet = document.getElementById('lensResultSheet');
-const lensSelectedText = document.getElementById('lensSelectedText');
-const lensQuickCopy = document.getElementById('lensQuickCopy');
-const lensSpeak = document.getElementById('lensSpeak');
-const lensTranslate = document.getElementById('lensTranslate');
-const lensMore = document.getElementById('lensMore');
-const lensSearchPreview = document.getElementById('lensSearchPreview');
-const lensBackToSelect = document.getElementById('lensBackToSelect');
-let lensRequestId = null;
-let lensCropper = null;
-let lensImageUrl = null;
-
-function tutupPilihAreaLens() {
-    if (lensCropper) { lensCropper.destroy(); lensCropper = null; }
-    lensSelectModal?.classList.remove('active');
-    lensSelectModal?.setAttribute('aria-hidden', 'true');
-    if (lensResultSheet) lensResultSheet.hidden = true;
-    if (lensSelectTextBtn) { lensSelectTextBtn.hidden = false; lensSelectTextBtn.disabled = false; lensSelectTextBtn.textContent = 'Pilih teks'; }
-    if (lensImageUrl) { URL.revokeObjectURL(lensImageUrl); lensImageUrl = null; }
-    lensChooseBtn.disabled = false;
-}
-
-lensChooseBtn?.addEventListener('click', () => lensImageInput?.click());
-lensImageInput?.addEventListener('change', () => {
-    const file = lensImageInput.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith('image/')) {
-        lensStatus.textContent = 'File harus berupa gambar.';
-        lensImageInput.value = '';
-        return;
-    }
-    if (!window.AndroidBridge?.recognizeText) {
-        lensStatus.textContent = 'Fitur Lens hanya tersedia di aplikasi Android BSA.';
-        lensImageInput.value = '';
-        return;
-    }
-    if (lensImageUrl) URL.revokeObjectURL(lensImageUrl);
-    lensImageUrl = URL.createObjectURL(file);
-    lensSelectImage.onload = () => {
-        if (lensCropper) lensCropper.destroy();
-        lensSelectModal.classList.add('active');
-        lensSelectModal.setAttribute('aria-hidden', 'false');
-        if (lensResultSheet) lensResultSheet.hidden = true;
-        lensSelectTextBtn.hidden = false;
-        lensCropper = new Cropper(lensSelectImage, {
-            viewMode: 1,
-            dragMode: 'crop',
-            autoCrop: true,
-            autoCropArea: 0.62,
-            responsive: true,
-            restore: false,
-            background: false,
-            movable: true,
-            zoomable: true,
-            rotatable: false,
-            scalable: false,
-            guides: true,
-            center: true,
-            highlight: true,
-            cropBoxMovable: true,
-            cropBoxResizable: true,
-            toggleDragModeOnDblclick: false
-        });
-        lensSelectHint.textContent = 'Geser kotak putih untuk memilih tulisan. Tarik sudutnya untuk mengubah ukuran.';
-        lensSelectTextBtn.disabled = false;
-        lensSelectTextBtn.textContent = 'Pilih teks';
-    };
-    lensSelectImage.onerror = () => {
-        lensStatus.textContent = 'Gambar tidak dapat dibuka.';
-        tutupPilihAreaLens();
-    };
-    lensSelectImage.src = lensImageUrl;
-    lensImageInput.value = '';
-});
-
-lensBackBtn?.addEventListener('click', () => tutupPilihAreaLens());
-
-lensSelectTextBtn?.addEventListener('click', async () => {
-    if (!lensCropper) return;
-    lensSelectTextBtn.disabled = true;
-    lensSelectTextBtn.textContent = 'Membaca teks...';
-    lensSelectHint.textContent = 'Sedang mengenali tulisan pada area yang dipilih.';
-    try {
-        const cropData = lensCropper.getData(true);
-        const source = lensCropper.getCroppedCanvas({
-            width: Math.min(2200, Math.max(1, Math.round(cropData.width))),
-            height: Math.min(2200, Math.max(1, Math.round(cropData.height))),
-            imageSmoothingEnabled: true,
-            imageSmoothingQuality: 'high'
-        });
-        if (!source || source.width < 2 || source.height < 2) throw new Error('Area teks belum dipilih.');
-        const encodedImage = source.toDataURL('image/jpeg', 0.92).split(',')[1];
-        lensRequestId = 'bsa-lens-' + Date.now();
-        lensStatus.textContent = 'Sedang membaca area teks yang dipilih...';
-        lensResult.value = '';
-        window.AndroidBridge.recognizeText(encodedImage, lensRequestId);
-    } catch (error) {
-        lensSelectHint.textContent = 'Gagal memproses area: ' + (error.message || 'Coba pilih ulang.');
-        lensSelectTextBtn.disabled = false;
-        lensSelectTextBtn.textContent = 'Pilih teks';
-    }
-});
-
-window.onBsaOcrResult = (requestId, recognizedText, errorMessage) => {
-    if (requestId !== lensRequestId) return;
-    if (errorMessage) {
-        lensStatus.textContent = 'Gagal membaca gambar: ' + errorMessage;
-        lensSelectHint.textContent = 'Gagal membaca teks. Silakan coba lagi.';
-        lensSelectTextBtn.disabled = false;
-        lensSelectTextBtn.textContent = 'Pilih teks';
-        return;
-    }
-    const result = (recognizedText || '').trim();
-    lensResult.value = result;
-    lensSelectedText.value = result;
-    lensSearchPreview.textContent = result || 'Tidak ada teks yang ditemukan';
-    lensStatus.textContent = result
-        ? 'Teks berhasil dikenali dari area yang dipilih.'
-        : 'Tulisan belum ditemukan. Coba perluas kotak seleksi.';
-    if (result) {
-        if (lensCropper) { lensCropper.destroy(); lensCropper = null; }
-        lensSelectTextBtn.hidden = true;
-        lensResultSheet.hidden = false;
-        lensSelectHint.textContent = 'Teks terpilih. Salin, dengarkan, atau terjemahkan.';
-    } else {
-        lensSelectTextBtn.disabled = false;
-        lensSelectTextBtn.textContent = 'Pilih teks';
-    }
-};
-
-lensQuickCopy?.addEventListener('click', async () => {
-    const value = lensSelectedText.value.trim();
-    if (!value) return;
-    try { await navigator.clipboard.writeText(value); }
-    catch (_) { lensSelectedText.focus(); lensSelectedText.select(); document.execCommand('copy'); }
-    lensSelectHint.textContent = 'Teks berhasil disalin.';
-});
-lensSpeak?.addEventListener('click', () => {
-    const value = lensSelectedText.value.trim();
-    if (!value || !('speechSynthesis' in window)) { lensSelectHint.textContent = 'Fitur dengarkan tidak tersedia di perangkat ini.'; return; }
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(new SpeechSynthesisUtterance(value));
-});
-lensTranslate?.addEventListener('click', () => {
-    const value = lensSelectedText.value.trim();
-    if (!value) return;
-    window.open('https://translate.google.com/?sl=auto&tl=id&text=' + encodeURIComponent(value) + '&op=translate', '_blank');
-});
-lensMore?.addEventListener('click', () => {
-    lensSelectedText.removeAttribute('readonly');
-    lensSelectedText.focus();
-    lensSelectHint.textContent = 'Mode edit teks aktif.';
-});
-lensBackToSelect?.addEventListener('click', () => {
-    lensResultSheet.hidden = true;
-    lensSelectTextBtn.hidden = false;
-    lensSelectTextBtn.disabled = false;
-    lensSelectTextBtn.textContent = 'Pilih teks';
-    if (lensCropper) lensCropper.destroy();
-    lensCropper = new Cropper(lensSelectImage, { viewMode: 1, dragMode: 'crop', autoCrop: true, autoCropArea: 0.62, responsive: true, background: false, movable: true, zoomable: true, guides: true, center: true, cropBoxMovable: true, cropBoxResizable: true, toggleDragModeOnDblclick: false });
-});
-
-lensCopyBtn?.addEventListener('click', async () => {
-    const value = lensResult.value.trim();
-    if (!value) { lensStatus.textContent = 'Belum ada teks untuk disalin.'; return; }
-    try {
-        await navigator.clipboard.writeText(value);
-        lensStatus.textContent = 'Teks berhasil disalin.';
-    } catch (_) {
-        lensResult.focus();
-        lensResult.select();
-        const copied = document.execCommand('copy');
-        lensStatus.textContent = copied ? 'Teks berhasil disalin.' : 'Pilih teks lalu salin manual.';
-    }
-});
-
-lensInsertBtn?.addEventListener('click', () => {
-    const value = lensResult.value.trim();
-    if (!value) { lensStatus.textContent = 'Belum ada teks untuk dimasukkan.'; return; }
-    text.innerText = value;
-    lensStatus.textContent = 'Teks sudah dimasukkan ke editor BSA.';
-    text.scrollIntoView({ behavior: 'smooth', block: 'center' });
-});
