@@ -650,3 +650,28 @@ body.light-mode .bsa-nav-item.active { color: #1558a6; background: #e8f1ff; }
 .koleksi-loading{display:none;align-items:center;justify-content:center;gap:12px;color:#f2f2f2;font-size:14px;padding:20px 8px}
 .koleksi-spinner{width:25px;height:25px;border:3px solid rgba(255,255,255,.22);border-top-color:#8b5cf6;border-right-color:#2196f3;border-radius:50%;animation:bsaKoleksiSpin .75s linear infinite}
 @keyframes bsaKoleksiSpin{to{transform:rotate(360deg)}}
+
+
+/* Koleksi BSA: tampilan minimalis dan profesional */
+.bsa-collection-overlay{position:fixed;inset:0;z-index:2000;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.78);box-sizing:border-box}
+.bsa-collection-panel{width:min(100%,560px);max-height:min(88vh,820px);overflow:auto;background:#111318;color:#f7f7f8;border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:20px;box-sizing:border-box;box-shadow:0 24px 70px rgba(0,0,0,.42)}
+.bsa-collection-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,.1)}
+.bsa-collection-eyebrow{font-size:10px;letter-spacing:1.6px;font-weight:700;color:#9b8cff;margin-bottom:6px}
+.bsa-collection-header h2{font-size:24px;line-height:1.2;margin:0;font-weight:700;color:#fff}
+.bsa-collection-header p{font-size:12px;color:#a5a7b0;margin:6px 0 0}
+.bsa-collection-actions{display:flex;gap:8px}
+.bsa-collection-iconbtn{width:36px;height:36px;border:1px solid rgba(255,255,255,.13);border-radius:10px;background:#20232b;color:#fff;font-size:22px;line-height:1;cursor:pointer}
+.bsa-collection-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 1px;color:#e7e7eb;font-size:12px;font-weight:600}
+.bsa-collection-format{color:#858894;font-size:10px;font-weight:500}
+.bsa-collection-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.bsa-collection-card{display:flex;flex-direction:column;gap:7px;min-width:0;padding:0;border:0;background:transparent;color:#e8e8ec;text-align:left;cursor:pointer}
+.bsa-collection-card img{display:block;width:100%;aspect-ratio:1;object-fit:cover;border:1px solid rgba(255,255,255,.12);border-radius:11px;background:#20232b}
+.bsa-collection-filename{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;color:#b9bbc4;padding:0 2px}
+.bsa-collection-empty{grid-column:1/-1;min-height:190px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;color:#a6a8b2;padding:20px}
+.bsa-collection-empty-icon{width:54px;height:54px;display:grid;place-items:center;border-radius:16px;background:#20232b;color:#a99cff;font-size:28px;margin-bottom:4px}
+.bsa-collection-empty strong{font-size:15px;color:#f4f4f6}
+.bsa-collection-empty span{max-width:240px;font-size:12px;line-height:1.5}
+.koleksi-loading{display:none;align-items:center;justify-content:center;gap:12px;color:#c8c9d0;font-size:13px;padding:22px 8px}
+.koleksi-spinner{width:23px;height:23px;border:2px solid rgba(255,255,255,.18);border-top-color:#9b8cff;border-radius:50%;animation:bsaKoleksiSpin .75s linear infinite}
+@keyframes bsaKoleksiSpin{to{transform:rotate(360deg)}}
+@media(max-width:360px){.bsa-collection-panel{padding:15px}.bsa-collection-grid{gap:8px}.bsa-collection-filename{font-size:10px}}

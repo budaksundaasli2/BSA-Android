@@ -307,27 +307,56 @@ private val sdCardFolderPicker = registerForActivityResult(
             return try {
                 val result = org.json.JSONArray()
                 val files: List<Pair<String, ByteArray>> = if (requestedLocation == "sdcard") {
-                    val treeUri = getSharedPreferences("bsa_settings", MODE_PRIVATE).getString("sdcard_tree_uri", null)
-                        ?: return "[]"
-                    val tree = DocumentFile.fromTreeUri(this@MainActivity, Uri.parse(treeUri)) ?: return "[]"
-                    tree.listFiles().filter { it.isFile && it.name?.endsWith(".png", true) == true }.mapNotNull { doc ->
+                    val prefs = getSharedPreferences("bsa_settings", MODE_PRIVATE)
+                    val treeUriString = prefs.getString("sdcard_tree_uri", null)
+                        ?: return org.json.JSONObject().put("error", "Folder SD Card belum dipilih").toString()
+                    val treeUri = Uri.parse(treeUriString)
+                    val hasPermission = contentResolver.persistedUriPermissions.any {
+                        it.uri == treeUri && it.isReadPermission
+                    }
+                    if (!hasPermission) {
+                        return org.json.JSONObject().put("error", "Izin baca folder SD Card tidak tersedia. Pilih ulang folder SD Card di Pengaturan.").toString()
+                    }
+                    val tree = DocumentFile.fromTreeUri(this@MainActivity, treeUri)
+                        ?: return org.json.JSONObject().put("error", "Folder SD Card tidak dapat dibuka").toString()
+
+                    // Baca file gambar langsung di folder yang dipilih dan satu tingkat subfolder BSA.
+                    val candidates = mutableListOf<DocumentFile>()
+                    tree.listFiles().forEach { entry ->
+                        if (entry.isFile && entry.name?.substringAfterLast('.', "")?.lowercase() in listOf("png", "jpg", "jpeg", "webp")) {
+                            candidates.add(entry)
+                        } else if (entry.isDirectory) {
+                            entry.listFiles().filter { child ->
+                                child.isFile && child.name?.substringAfterLast('.', "")?.lowercase() in listOf("png", "jpg", "jpeg", "webp")
+                            }.forEach { candidates.add(it) }
+                        }
+                    }
+                    candidates.sortedByDescending { it.lastModified() }.mapNotNull { doc ->
                         try { contentResolver.openInputStream(doc.uri)?.use { doc.name.orEmpty() to it.readBytes() } } catch (_: Exception) { null }
                     }
                 } else {
                     val folder = File(filesDir, "BSA")
-                    folder.listFiles()?.filter { it.isFile && it.extension.equals("png", true) }
-                        ?.sortedByDescending { it.lastModified() }
-                        ?.map { it.name to it.readBytes() } ?: emptyList()
+                    folder.listFiles()?.filter {
+                        it.isFile && it.extension.lowercase() in listOf("png", "jpg", "jpeg", "webp")
+                    }?.sortedByDescending { it.lastModified() }?.map { it.name to it.readBytes() } ?: emptyList()
                 }
                 files.forEach { (name, bytes) ->
                     val item = JSONObject()
                     item.put("id", name)
                     item.put("name", name)
-                    item.put("dataUrl", "data:image/png;base64," + Base64.encodeToString(bytes, Base64.NO_WRAP))
+                    val mime = when (name.substringAfterLast('.', "").lowercase()) {
+                        "jpg", "jpeg" -> "image/jpeg"
+                        "webp" -> "image/webp"
+                        else -> "image/png"
+                    }
+                    item.put("dataUrl", "data:$mime;base64," + Base64.encodeToString(bytes, Base64.NO_WRAP))
                     result.put(item)
                 }
                 result.toString()
-            } catch (_: Exception) { "[]" }
+            } catch (error: Exception) {
+                android.util.Log.e("BSA-Koleksi", "Gagal membaca lokasi $requestedLocation", error)
+                org.json.JSONObject().put("error", error.message ?: "Gagal membaca folder").toString()
+            }
         }
 
         @JavascriptInterface
