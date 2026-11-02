@@ -678,3 +678,10 @@ body.light-mode .bsa-nav-item.active { color: #1558a6; background: #e8f1ff; }
 
 /* Navigasi BSA setelah fitur Koleksi dihapus */
 .bsa-bottom-nav{grid-template-columns:repeat(2,minmax(0,1fr)) !important;}
+
+/* Kamera dipindahkan ke navigasi tengah */
+#openCameraBtn{display:none !important}
+.bsa-bottom-nav{grid-template-columns:repeat(3,minmax(0,1fr)) !important;align-items:center}
+.bsa-camera-nav{justify-self:center;position:relative}
+.bsa-camera-nav .bsa-camera-nav-icon{width:42px;height:42px;display:grid;place-items:center;border-radius:50%;background:linear-gradient(145deg,#8b5cf6,#6d4aff);color:#fff;font-size:25px;line-height:1;box-shadow:0 4px 14px rgba(124,58,237,.35)}
+.bsa-camera-nav small{margin-top:3px}

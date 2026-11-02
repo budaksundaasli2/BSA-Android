@@ -308,6 +308,14 @@ function bukaHome() {
     window.location.reload();
 }
 
+const navCamera = document.getElementById('navCamera');
+if (navCamera) {
+    navCamera.addEventListener('click', () => {
+        const cameraButton = document.getElementById('openCameraBtn');
+        if (cameraButton) cameraButton.click();
+    });
+}
+
 bsaNavItems.forEach(item => {
     item.addEventListener('click', () => {
         const page = item.dataset.page;
