@@ -666,17 +666,32 @@ previewModal.addEventListener("click", (e) => {
 window.addEventListener('pagehide', hentikanKamera);
 
 
-/* BSA Lens: OCR teks dari gambar dengan Google ML Kit di perangkat. */
+/* BSA Lens: pilih area tulisan lalu OCR dengan Google ML Kit di perangkat. */
 const lensImageInput = document.getElementById('lensImageInput');
 const lensChooseBtn = document.getElementById('lensChooseBtn');
 const lensStatus = document.getElementById('lensStatus');
 const lensResult = document.getElementById('lensResult');
 const lensCopyBtn = document.getElementById('lensCopyBtn');
 const lensInsertBtn = document.getElementById('lensInsertBtn');
+const lensSelectModal = document.getElementById('lensSelectModal');
+const lensSelectImage = document.getElementById('lensSelectImage');
+const lensBackBtn = document.getElementById('lensBackBtn');
+const lensSelectTextBtn = document.getElementById('lensSelectTextBtn');
+const lensSelectHint = document.getElementById('lensSelectHint');
 let lensRequestId = null;
+let lensCropper = null;
+let lensImageUrl = null;
+
+function tutupPilihAreaLens() {
+    if (lensCropper) { lensCropper.destroy(); lensCropper = null; }
+    lensSelectModal?.classList.remove('active');
+    lensSelectModal?.setAttribute('aria-hidden', 'true');
+    if (lensImageUrl) { URL.revokeObjectURL(lensImageUrl); lensImageUrl = null; }
+    lensChooseBtn.disabled = false;
+}
 
 lensChooseBtn?.addEventListener('click', () => lensImageInput?.click());
-lensImageInput?.addEventListener('change', async () => {
+lensImageInput?.addEventListener('change', () => {
     const file = lensImageInput.files?.[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) {
@@ -689,40 +704,82 @@ lensImageInput?.addEventListener('change', async () => {
         lensImageInput.value = '';
         return;
     }
+    if (lensImageUrl) URL.revokeObjectURL(lensImageUrl);
+    lensImageUrl = URL.createObjectURL(file);
+    lensSelectImage.onload = () => {
+        if (lensCropper) lensCropper.destroy();
+        lensSelectModal.classList.add('active');
+        lensSelectModal.setAttribute('aria-hidden', 'false');
+        lensCropper = new Cropper(lensSelectImage, {
+            viewMode: 1,
+            dragMode: 'crop',
+            autoCrop: true,
+            autoCropArea: 0.62,
+            responsive: true,
+            restore: false,
+            background: false,
+            movable: true,
+            zoomable: true,
+            rotatable: false,
+            scalable: false,
+            guides: true,
+            center: true,
+            highlight: true,
+            cropBoxMovable: true,
+            cropBoxResizable: true,
+            toggleDragModeOnDblclick: false
+        });
+        lensSelectHint.textContent = 'Geser kotak putih untuk memilih tulisan. Tarik sudutnya untuk mengubah ukuran.';
+        lensSelectTextBtn.disabled = false;
+        lensSelectTextBtn.textContent = 'Pilih teks';
+    };
+    lensSelectImage.onerror = () => {
+        lensStatus.textContent = 'Gambar tidak dapat dibuka.';
+        tutupPilihAreaLens();
+    };
+    lensSelectImage.src = lensImageUrl;
+    lensImageInput.value = '';
+});
 
-    lensChooseBtn.disabled = true;
-    lensStatus.textContent = 'Sedang membaca tulisan...';
-    lensResult.value = '';
+lensBackBtn?.addEventListener('click', () => tutupPilihAreaLens());
+
+lensSelectTextBtn?.addEventListener('click', async () => {
+    if (!lensCropper) return;
+    lensSelectTextBtn.disabled = true;
+    lensSelectTextBtn.textContent = 'Membaca teks...';
+    lensSelectHint.textContent = 'Sedang mengenali tulisan pada area yang dipilih.';
     try {
-        const bitmap = await createImageBitmap(file);
-        const scale = Math.min(1, 2200 / Math.max(bitmap.width, bitmap.height));
-        const canvas = document.createElement('canvas');
-        canvas.width = Math.max(1, Math.round(bitmap.width * scale));
-        canvas.height = Math.max(1, Math.round(bitmap.height * scale));
-        canvas.getContext('2d', { alpha: false }).drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-        bitmap.close?.();
-        const encodedImage = canvas.toDataURL('image/jpeg', 0.88).split(',')[1];
+        const cropData = lensCropper.getData(true);
+        const source = lensCropper.getCroppedCanvas({
+            width: Math.min(2200, Math.max(1, Math.round(cropData.width))),
+            height: Math.min(2200, Math.max(1, Math.round(cropData.height))),
+            imageSmoothingEnabled: true,
+            imageSmoothingQuality: 'high'
+        });
+        if (!source || source.width < 2 || source.height < 2) throw new Error('Area teks belum dipilih.');
+        const encodedImage = source.toDataURL('image/jpeg', 0.92).split(',')[1];
         lensRequestId = 'bsa-lens-' + Date.now();
+        lensStatus.textContent = 'Sedang membaca area teks yang dipilih...';
+        lensResult.value = '';
         window.AndroidBridge.recognizeText(encodedImage, lensRequestId);
     } catch (error) {
-        lensStatus.textContent = 'Gambar gagal diproses: ' + (error.message || 'Kesalahan tidak diketahui');
-        lensChooseBtn.disabled = false;
-    } finally {
-        lensImageInput.value = '';
+        lensSelectHint.textContent = 'Gagal memproses area: ' + (error.message || 'Coba pilih ulang.');
+        lensSelectTextBtn.disabled = false;
+        lensSelectTextBtn.textContent = 'Pilih teks';
     }
 });
 
 window.onBsaOcrResult = (requestId, recognizedText, errorMessage) => {
     if (requestId !== lensRequestId) return;
-    lensChooseBtn.disabled = false;
+    tutupPilihAreaLens();
     if (errorMessage) {
         lensStatus.textContent = 'Gagal membaca gambar: ' + errorMessage;
         return;
     }
     lensResult.value = recognizedText || '';
     lensStatus.textContent = recognizedText
-        ? 'Selesai. Periksa kembali hasil tulisan sebelum digunakan.'
-        : 'Tulisan belum ditemukan. Coba gambar yang lebih jelas.';
+        ? 'Selesai. Teks dari area pilihan berhasil dibaca. Periksa kembali hasilnya.'
+        : 'Tulisan belum ditemukan di area pilihan. Coba perluas kotak seleksi.';
 };
 
 lensCopyBtn?.addEventListener('click', async () => {

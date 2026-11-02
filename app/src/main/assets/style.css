@@ -565,3 +565,57 @@ body.light-mode .lens-panel { background:#fff; color:#171717; border-color:#ddd;
 body.light-mode .lens-heading p, body.light-mode .lens-status { color:#555; }
 body.light-mode .lens-panel textarea { background:#f7f7f7; color:#171717; border-color:#ccc; }
 body.light-mode .lens-actions button { background:#e8e8e8; color:#171717; }
+
+
+/* BSA Lens selection screen */
+.lens-select-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: #111;
+    color: #fff;
+    flex-direction: column;
+    padding: 0;
+}
+.lens-select-modal.active { display: flex; }
+.lens-select-header {
+    min-height: 72px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 18px;
+    background: #111;
+}
+.lens-select-header button {
+    border: 0; background: transparent; color: white;
+    font-size: 38px; line-height: 1; padding: 0 8px; cursor: pointer;
+}
+.lens-select-header strong { display: block; font-size: 21px; }
+.lens-select-header small { display: block; color: #aaa; font-size: 12px; margin-top: 3px; }
+.lens-select-spacer { flex: 1; }
+.lens-select-stage {
+    flex: 1; min-height: 0; display: flex; align-items: center;
+    justify-content: center; overflow: hidden; padding: 12px;
+    background: #171717;
+}
+#lensSelectImage { display: block; max-width: 100%; max-height: 100%; }
+.lens-select-stage .cropper-container { max-width: 100% !important; max-height: 100% !important; }
+.lens-select-stage .cropper-view-box {
+    outline: 2px solid #fff; outline-color: rgba(255,255,255,.95);
+}
+.lens-select-stage .cropper-line,
+.lens-select-stage .cropper-point { background: #fff; }
+.lens-select-stage .cropper-point { width: 12px; height: 12px; opacity: 1; }
+.lens-select-footer {
+    background: #222328; border-radius: 24px 24px 0 0;
+    padding: 20px 22px max(24px, env(safe-area-inset-bottom));
+    box-shadow: 0 -8px 28px rgba(0,0,0,.25);
+}
+.lens-select-footer p { color: #d0d0d0; font-size: 14px; line-height: 1.5; margin: 0 0 16px; }
+#lensSelectTextBtn {
+    display: block; width: 100%; border: 0; border-radius: 28px;
+    background: #dce7ff; color: #17233e; padding: 15px 20px;
+    font-size: 17px; font-weight: 700; cursor: pointer;
+}
+#lensSelectTextBtn:disabled { opacity: .55; }

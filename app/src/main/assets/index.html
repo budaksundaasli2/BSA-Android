@@ -115,7 +115,24 @@
         </div>
     </div>
 
-    <script src="script.js?v=20261102-bsa-lens"></script>
+
+
+    <!-- BSA Lens: layar pilih area teks seperti Google Lens -->
+    <div id="lensSelectModal" class="lens-select-modal" aria-hidden="true">
+        <div class="lens-select-header">
+            <button type="button" id="lensBackBtn" aria-label="Kembali">‹</button>
+            <div><strong>BSA Lens</strong><small>Geser kotak untuk memilih tulisan</small></div>
+            <span class="lens-select-spacer"></span>
+        </div>
+        <div class="lens-select-stage">
+            <img id="lensSelectImage" alt="Pilih area tulisan pada gambar">
+        </div>
+        <div class="lens-select-footer">
+            <p id="lensSelectHint">Atur kotak seleksi agar mencakup tulisan yang ingin disalin.</p>
+            <button type="button" id="lensSelectTextBtn">Pilih teks</button>
+        </div>
+    </div>
+\n    <script src="script.js?v=20261102-bsa-lens-select"></script>
     <footer class="footer">
   &copy; 2026 Budak Sunda Asli. All rights reserved.
 </footer>
