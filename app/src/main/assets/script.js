@@ -632,31 +632,7 @@ function generateImage(callback) {
             ctx.fillStyle = gradBottom;
             ctx.fillRect(0, hdSize - gradientHeight, hdSize, gradientHeight);
 
-            // Gambar original-bsa
-            // Blur area kiri bawah tanpa PNG
-const blurWidth = Math.floor(hdSize * 0.20);
-const blurHeight = Math.floor(hdSize * 0.14);
-const x = hdSize - blurWidth;
-const y = hdSize - blurHeight;
-
-ctx.save();
-ctx.filter = "blur(10px)";
-
-// ambil potongan background lalu gambar ulang dengan blur
-ctx.drawImage(
-    canvas,
-    x,
-    y,
-    blurWidth,
-    blurHeight,
-    x,
-    y,
-    blurWidth,
-    blurHeight
-);
-
-ctx.restore();
-
+            // Gambar original BSA tanpa efek blur di pojok kanan bawah.
 
             const maxTextWidth = hdSize - (hdSize * 0.167);
             const wrappedLines = smartWordWrap(text.innerText, maxTextWidth);
