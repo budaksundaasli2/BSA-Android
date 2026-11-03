@@ -334,45 +334,85 @@ private val sdCardFolderPicker = registerForActivityResult(
                 val useInternalStorage = normalizedLocation == "internal" || normalizedLocation.isBlank()
                 val useSdCard = normalizedLocation == "sdcard"
                 if (useInternalStorage) {
-                    // Penyimpanan internal privat aplikasi: tidak membutuhkan izin storage Android.
-                    val directory = File(filesDir, "BSA")
-                    if (!directory.exists() && !directory.mkdirs()) {
-                        error("Folder internal BSA tidak dapat dibuat: ${directory.absolutePath}")
-                    }
-                    if (!directory.isDirectory || !directory.canWrite()) {
-                        error("Folder internal BSA tidak memiliki akses tulis")
-                    }
+                    // Simpan ke memori internal bersama agar hasil PNG terlihat di Galeri/File Manager.
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        // MediaStore membuat kembali folder Pictures/BSA jika belum ada.
+                        val relativePath = Environment.DIRECTORY_PICTURES + "/BSA"
+                        val resolver = contentResolver
+                        val existing = resolver.query(
+                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                            arrayOf(MediaStore.Images.Media._ID),
+                            "${MediaStore.Images.Media.DISPLAY_NAME}=? AND ${MediaStore.Images.Media.RELATIVE_PATH}=?",
+                            arrayOf(safeName, relativePath + "/"),
+                            null
+                        )
+                        existing?.use { cursor ->
+                            val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
+                            while (cursor.moveToNext()) {
+                                val oldUri = Uri.withAppendedPath(
+                                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                                    cursor.getLong(idColumn).toString()
+                                )
+                                resolver.delete(oldUri, null, null)
+                            }
+                        }
 
-                    val output = File(directory, safeName)
-                    val temporary = File(directory, ".$safeName.tmp")
-                    try {
-                        java.io.FileOutputStream(temporary).use { stream ->
+                        val values = ContentValues().apply {
+                            put(MediaStore.Images.Media.DISPLAY_NAME, safeName)
+                            put(MediaStore.Images.Media.MIME_TYPE, "image/png")
+                            put(MediaStore.Images.Media.RELATIVE_PATH, relativePath)
+                            put(MediaStore.Images.Media.IS_PENDING, 1)
+                        }
+                        val imageUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+                            ?: error("Tidak dapat membuat file di memori internal")
+                        try {
+                            resolver.openOutputStream(imageUri, "w")?.use { stream ->
+                                stream.write(bytes)
+                                stream.flush()
+                            } ?: error("Tidak dapat menulis file PNG")
+
+                            val verify = resolver.openFileDescriptor(imageUri, "r")
+                                ?: error("File PNG tidak dapat diverifikasi")
+                            verify.use {
+                                if (it.statSize != bytes.size.toLong()) {
+                                    error("Ukuran file tidak sesuai setelah disimpan")
+                                }
+                            }
+                            val publish = ContentValues().apply {
+                                put(MediaStore.Images.Media.IS_PENDING, 0)
+                            }
+                            resolver.update(imageUri, publish, null, null)
+                        } catch (writeError: Exception) {
+                            resolver.delete(imageUri, null, null)
+                            throw writeError
+                        }
+                    } else {
+                        // Android 9 ke bawah: gunakan direktori Pictures khusus aplikasi.
+                        val base = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+                            ?: error("Penyimpanan internal tidak tersedia")
+                        val directory = File(base, "BSA")
+                        // Jika folder terhapus, buat kembali secara otomatis sebelum menyimpan.
+                        if (directory.exists() && !directory.isDirectory) {
+                            if (!directory.delete()) error("Lokasi folder BSA tidak dapat diperbaiki")
+                        }
+                        if (!directory.exists()) {
+                            val created = directory.mkdirs()
+                            if (!created && !directory.isDirectory) {
+                                error("Folder Pictures/BSA tidak dapat dibuat ulang")
+                            }
+                        }
+                        if (!directory.isDirectory || !directory.canWrite()) {
+                            error("Folder Pictures/BSA tidak dapat ditulis")
+                        }
+                        val output = File(directory, safeName)
+                        java.io.FileOutputStream(output).use { stream ->
                             stream.write(bytes)
                             stream.flush()
                             stream.fd.sync()
                         }
-                        if (!temporary.exists() || temporary.length() != bytes.size.toLong()) {
-                            error("Data sementara gagal ditulis lengkap")
-                        }
-                        if (output.exists() && !output.delete()) {
-                            error("File lama tidak dapat diganti: ${output.name}")
-                        }
-                        if (!temporary.renameTo(output)) {
-                            // Fallback jika filesystem tidak mendukung rename atomik.
-                            java.io.FileInputStream(temporary).use { input ->
-                                java.io.FileOutputStream(output).use { stream ->
-                                    input.copyTo(stream)
-                                    stream.flush()
-                                    stream.fd.sync()
-                                }
-                            }
-                            temporary.delete()
-                        }
                         if (!output.isFile || output.length() != bytes.size.toLong()) {
                             error("Verifikasi hasil unduhan gagal")
                         }
-                    } finally {
-                        if (temporary.exists()) temporary.delete()
                     }
                 } else if (useSdCard) {
                     val treeUriString = getSharedPreferences("bsa_settings", MODE_PRIVATE)
@@ -390,7 +430,7 @@ private val sdCardFolderPicker = registerForActivityResult(
                     val values = ContentValues().apply {
                         put(MediaStore.Images.Media.DISPLAY_NAME, safeName)
                         put(MediaStore.Images.Media.MIME_TYPE, "image/png")
-                        put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/Budak Sunda Asli")
+                        put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/BSA")
                         put(MediaStore.Images.Media.IS_PENDING, 1)
                     }
                     val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
@@ -405,18 +445,14 @@ private val sdCardFolderPicker = registerForActivityResult(
                         throw error
                     }
                 } else {
-                    val directory = File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "Budak Sunda Asli")
+                    val directory = File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "BSA")
                     if (!directory.exists() && !directory.mkdirs()) {
                         error("Tidak dapat membuat folder penyimpanan")
                     }
                     File(directory, safeName).writeBytes(bytes)
                 }
 
-                val saveLocationMessage = when {
-                    useInternalStorage -> "PNG disimpan di penyimpanan internal aplikasi BSA"
-                    useSdCard -> "PNG berhasil disimpan ke folder SD Card pilihan Anda"
-                    else -> "PNG berhasil disimpan di Pictures/Budak Sunda Asli"
-                }
+                val saveLocationMessage = "Tersimpan"
 
                 runOnUiThread {
                     Toast.makeText(

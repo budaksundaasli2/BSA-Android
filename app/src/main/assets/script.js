@@ -54,7 +54,7 @@ function perbaruiDeskripsiPenyimpanan() {
     chooseSdCardFolderBtn.hidden = !isSdCard;
     storageDescription.textContent = isSdCard
         ? 'Tekan tombol Pilih folder SD Card, lalu pilih folder pada kartu microSD. BSA akan menyimpan hasil unduhan ke folder yang Anda izinkan.'
-        : 'Hasil disimpan di penyimpanan internal khusus aplikasi BSA. File tidak otomatis tampil di Galeri dan dapat terhapus saat aplikasi dihapus.';
+        : 'Hasil PNG disimpan di memori internal HP, folder Pictures/BSA, dan dapat dilihat melalui Galeri atau File Manager.';
 }
 function bukaPengaturan() {
     settingsPanel.hidden = false;

@@ -6,7 +6,7 @@ Source project Android Studio untuk aplikasi BSA.
 - Ikon aplikasi menggunakan logo Budak Sunda Asli putih pada latar hitam sesuai gambar yang diberikan.
 - Menyediakan ikon launcher normal, round, adaptive, dan monochrome (Android 13+).
 - Mempertahankan perbaikan tombol Unduh PNG dari versi 1.1.
-- Pada Android 10+, gambar disimpan melalui MediaStore ke `Pictures/Budak Sunda Asli`.
+- Pada Android 10+, gambar disimpan melalui MediaStore ke `Pictures/BSA`.
 
 ## Build APK dengan GitHub Actions
 1. Unggah seluruh isi folder proyek ini ke root repository GitHub (bukan folder induknya).
