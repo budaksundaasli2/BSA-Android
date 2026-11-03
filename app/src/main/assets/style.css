@@ -685,3 +685,84 @@ body.light-mode .bsa-nav-item.active { color: #1558a6; background: #e8f1ff; }
 .bsa-camera-nav{justify-self:center;position:relative}
 .bsa-camera-nav .bsa-camera-nav-icon{width:42px;height:42px;display:grid;place-items:center;border-radius:50%;background:linear-gradient(145deg,#8b5cf6,#6d4aff);color:#fff;font-size:25px;line-height:1;box-shadow:0 4px 14px rgba(124,58,237,.35)}
 .bsa-camera-nav small{margin-top:3px}
+
+
+/* BSA Professional UI refresh: navigation and settings */
+:root { --bsa-accent:#7657e8; --bsa-accent-2:#9278ff; --bsa-panel:#191a20; --bsa-card:#23252d; --bsa-muted:#9b9eaa; }
+body { padding-bottom: calc(88px + env(safe-area-inset-bottom)); }
+.bsa-bottom-nav {
+  left: 12px; right: 12px; bottom: max(10px, env(safe-area-inset-bottom));
+  grid-template-columns: 1fr 1fr 1fr !important; gap: 5px; padding: 7px;
+  border: 1px solid rgba(255,255,255,.09); border-radius: 22px;
+  background: rgba(27,28,35,.94); box-shadow: 0 10px 34px rgba(0,0,0,.32);
+  backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px);
+}
+.bsa-nav-item { min-height: 58px; border-radius: 16px; gap: 4px; color:#9699a6; transition:background .2s ease,color .2s ease,transform .2s ease; box-shadow:none; }
+.bsa-nav-item .bsa-nav-icon { font-size:23px; line-height:1.05; }
+.bsa-nav-item small { font-size:10px; letter-spacing:.15px; font-weight:650; }
+.bsa-nav-item.active { color:#c9bcff; background:rgba(118,87,232,.16); }
+.bsa-nav-item.active .bsa-nav-icon { color:#a995ff; }
+.bsa-camera-nav { transform:translateY(-5px); }
+.bsa-camera-nav .bsa-camera-nav-icon { width:48px; height:48px; border:4px solid #1b1c23; outline:1px solid rgba(255,255,255,.13); background:linear-gradient(145deg,#9a83ff,#6545d8); color:white; font-size:26px; box-shadow:0 6px 18px rgba(118,87,232,.38); }
+.bsa-camera-nav small { color:#c7c8d1; }
+.bsa-camera-nav:active { transform:translateY(-3px) scale(.97); }
+body.light-mode .bsa-bottom-nav { background:rgba(255,255,255,.94); border-color:rgba(20,20,30,.09); box-shadow:0 8px 28px rgba(30,35,50,.14); }
+body.light-mode .bsa-nav-item { color:#777987; }
+body.light-mode .bsa-nav-item.active { color:#6545d8; background:rgba(118,87,232,.11); }
+body.light-mode .bsa-camera-nav .bsa-camera-nav-icon { border-color:#fff; outline-color:rgba(20,20,30,.12); }
+
+.settings-panel {
+  padding: max(18px,env(safe-area-inset-top)) 0 max(28px,env(safe-area-inset-bottom));
+  background:#111218; color:#f6f6fa; transform:translateX(100%);
+  box-shadow:-18px 0 50px rgba(0,0,0,.34);
+}
+.settings-panel.settings-panel-open { transform:translateX(0); }
+.settings-topbar { display:flex; align-items:center; gap:13px; padding:14px 20px 22px; border-bottom:1px solid rgba(255,255,255,.07); }
+.settings-brand-mark { flex:0 0 46px; width:46px; height:46px; display:grid; place-items:center; border-radius:15px; color:white; font-size:23px; font-weight:850; background:linear-gradient(145deg,#9b83ff,#6242d3); box-shadow:0 7px 20px rgba(118,87,232,.28); }
+.settings-heading { flex:1; min-width:0; }
+.settings-eyebrow { display:block; color:#a995ff; font-size:9px; font-weight:800; letter-spacing:1.8px; margin-bottom:4px; }
+.settings-topbar h2 { margin:0 !important; padding:0 !important; border:0 !important; color:#fff; font-size:25px; line-height:1.15; font-weight:750; }
+.settings-topbar p { margin:5px 0 0; color:#9295a2; font-size:12px; }
+.settings-back { flex:0 0 38px; width:38px; height:38px; min-width:38px; padding:0; border:1px solid rgba(255,255,255,.1); border-radius:12px; background:#242630; color:#e7e7ed; font-size:25px; line-height:1; box-shadow:none; }
+.settings-content { max-width:620px; margin:0 auto; padding:21px 18px 20px; }
+.settings-section-title { margin:3px 4px 10px; color:#858895; font-size:10px; font-weight:800; letter-spacing:1.35px; }
+.settings-card { margin-bottom:20px; padding:4px 15px; border:1px solid rgba(255,255,255,.065); border-radius:18px; background:linear-gradient(145deg,#20222b,#1b1d25); box-shadow:0 8px 24px rgba(0,0,0,.12); }
+.setting-row.setting-row-pro { min-height:68px; margin:0 !important; gap:12px; cursor:pointer; }
+.setting-leading-icon { flex:0 0 38px; width:38px; height:38px; display:grid; place-items:center; border-radius:12px; color:#b6a7ff; background:rgba(135,111,255,.13); font-size:21px; font-weight:700; }
+.setting-copy { flex:1; min-width:0; display:flex; flex-direction:column; gap:4px; }
+.setting-copy strong { color:#f0f0f5; font-size:14px; font-weight:650; }
+.setting-copy small { color:#9295a2; font-size:11px; line-height:1.4; font-weight:400; }
+.setting-control { position:relative; flex:0 0 44px; width:44px; height:26px; }
+.setting-control input { position:absolute; inset:0; z-index:2; width:44px !important; height:26px !important; margin:0; opacity:0; cursor:pointer; }
+.setting-control i { position:absolute; inset:0; border-radius:30px; background:#41434e; transition:background .2s ease; }
+.setting-control i:after { content:''; position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:#f7f7fa; box-shadow:0 2px 5px rgba(0,0,0,.25); transition:transform .2s ease; }
+.setting-control input:checked + i { background:#7959eb; }
+.setting-control input:checked + i:after { transform:translateX(18px); }
+.storage-card { padding:15px; }
+.storage-heading { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+.setting-select { box-sizing:border-box; margin:0; min-height:48px; padding:0 14px; border:1px solid rgba(255,255,255,.1); border-radius:12px; background:#171920; color:#f4f3fa; font-size:13px; font-weight:600; outline:none; }
+.setting-select:focus { border-color:#8c75f3; box-shadow:0 0 0 3px rgba(118,87,232,.15); }
+.settings-folder-button { display:flex; align-items:center; gap:9px; width:100%; min-height:44px; margin:10px 0 0; padding:0 13px; border:1px solid rgba(142,119,255,.28); border-radius:11px; background:rgba(118,87,232,.12); color:#c9bdff; font-size:12px; font-weight:650; box-shadow:none; }
+.settings-folder-button b { margin-left:auto; font-size:20px; font-weight:400; }
+.setting-help { margin:11px 2px 0; color:#9295a2; font-size:11px; line-height:1.55; }
+.settings-about-card { display:flex; align-items:center; gap:12px; margin:7px 0 17px; padding:14px; border:1px solid rgba(255,255,255,.07); border-radius:16px; background:#1b1d25; }
+.settings-about-logo { flex:0 0 39px; width:39px; height:39px; display:grid; place-items:center; border-radius:12px; background:linear-gradient(145deg,#9278ff,#6041d2); color:#fff; font-size:12px; font-weight:900; letter-spacing:.5px; }
+.settings-about-card > div:nth-child(2) { flex:1; display:flex; flex-direction:column; gap:4px; }
+.settings-about-card strong { color:#f0f0f5; font-size:12px; }
+.settings-about-card small { color:#9295a2; font-size:10px; }
+.settings-version-pill { padding:6px 9px; border-radius:20px; color:#c6baff; background:rgba(118,87,232,.15); font-size:10px; font-weight:750; }
+.settings-gesture-hint { margin:12px 0 0; color:#777b89; font-size:10px; text-align:center; }
+#chooseSdCardFolderBtn[hidden] { display:none !important; }
+body.light-mode .settings-panel { background:#f5f6fa; color:#20212a; }
+body.light-mode .settings-topbar { border-color:rgba(20,20,30,.08); }
+body.light-mode .settings-topbar h2 { color:#20212a; }
+body.light-mode .settings-topbar p, body.light-mode .setting-copy small, body.light-mode .setting-help { color:#747786; }
+body.light-mode .settings-back { color:#454653; background:#fff; border-color:#e4e5ec; }
+body.light-mode .settings-section-title { color:#777a88; }
+body.light-mode .settings-card { background:#fff; border-color:#e7e8ef; box-shadow:0 7px 20px rgba(35,40,60,.045); }
+body.light-mode .setting-copy strong, body.light-mode .settings-about-card strong { color:#242530; }
+body.light-mode .setting-select { color:#272834; background:#f7f7fb; border-color:#e1e2e9; }
+body.light-mode .settings-about-card { background:#fff; border-color:#e7e8ef; }
+body.light-mode .settings-gesture-hint { color:#858897; }
+@media (max-width:360px) { .settings-content { padding-left:14px; padding-right:14px; } .settings-topbar { padding-left:16px; padding-right:16px; } }
+@media (prefers-reduced-motion:reduce) { .bsa-nav-item,.setting-control i,.setting-control i:after { transition:none; } }

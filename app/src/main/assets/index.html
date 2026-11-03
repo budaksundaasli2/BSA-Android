@@ -30,23 +30,50 @@
                 <input type="file" id="cameraCaptureInput" accept="image/*" capture="environment" hidden>
             </div>
         </div>
-<section id="settingsPanel" class="settings-panel" hidden>
-            <h2>Pengaturan BSA</h2>
-            <p class="settings-gesture-hint">Geser ke kiri untuk menutup</p>
-            <label class="setting-row" for="darkModeToggle">
-                <span>Dark mode</span><input type="checkbox" id="darkModeToggle">
-            </label>
-            <label class="setting-row" for="watermarkToggle">
-                <span>Watermark BSA</span><input type="checkbox" id="watermarkToggle" checked>
-            </label>
-            <label for="storageLocation">Lokasi penyimpanan</label>
-            <select id="storageLocation" class="setting-select">
-                <option value="internal">Internal</option>
-                <option value="sdcard">SD Card</option>
-            </select>
-            <button type="button" id="chooseSdCardFolderBtn" class="settings-close" hidden>Pilih folder SD Card</button>
-            <p id="storageDescription" class="setting-help">Hasil unduhan disimpan di penyimpanan internal aplikasi BSA.</p>
-            <div class="setting-version">Versi BSA <strong id="appVersion">2.3</strong></div>
+<section id="settingsPanel" class="settings-panel" hidden aria-label="Pengaturan BSA">
+            <header class="settings-topbar">
+                <div class="settings-brand-mark">B</div>
+                <div class="settings-heading">
+                    <span class="settings-eyebrow">BSA ANDROID</span>
+                    <h2>Pengaturan</h2>
+                    <p>Atur pengalaman aplikasi sesuai kebutuhan.</p>
+                </div>
+                <button type="button" id="closeSettingsBtn" class="settings-back" aria-label="Tutup pengaturan">×</button>
+            </header>
+            <div class="settings-content">
+                <div class="settings-section-title">TAMPILAN</div>
+                <div class="settings-card">
+                    <label class="setting-row setting-row-pro" for="darkModeToggle">
+                        <span class="setting-leading-icon">◐</span>
+                        <span class="setting-copy"><strong>Mode gelap</strong><small>Gunakan tampilan gelap yang nyaman.</small></span>
+                        <span class="setting-control"><input type="checkbox" id="darkModeToggle"><i></i></span>
+                    </label>
+                </div>
+                <div class="settings-section-title">HASIL GAMBAR</div>
+                <div class="settings-card">
+                    <label class="setting-row setting-row-pro" for="watermarkToggle">
+                        <span class="setting-leading-icon">◇</span>
+                        <span class="setting-copy"><strong>Watermark BSA</strong><small>Tampilkan identitas BSA pada hasil gambar.</small></span>
+                        <span class="setting-control"><input type="checkbox" id="watermarkToggle" checked><i></i></span>
+                    </label>
+                </div>
+                <div class="settings-section-title">PENYIMPANAN</div>
+                <div class="settings-card storage-card">
+                    <div class="storage-heading"><span class="setting-leading-icon">▣</span><span class="setting-copy"><strong>Lokasi penyimpanan</strong><small>Pilih tempat menyimpan hasil unduhan.</small></span></div>
+                    <select id="storageLocation" class="setting-select" aria-label="Lokasi penyimpanan">
+                        <option value="internal">Penyimpanan internal</option>
+                        <option value="sdcard">Kartu SD</option>
+                    </select>
+                    <button type="button" id="chooseSdCardFolderBtn" class="settings-folder-button" hidden><span>▤</span> Pilih folder kartu SD <b>›</b></button>
+                    <p id="storageDescription" class="setting-help">Hasil unduhan disimpan di penyimpanan internal aplikasi BSA.</p>
+                </div>
+                <div class="settings-about-card">
+                    <div class="settings-about-logo">BSA</div>
+                    <div><strong>Budak Sunda Asli</strong><small>Aplikasi editor gambar</small></div>
+                    <span class="settings-version-pill">v<span id="appVersion">2.3</span></span>
+                </div>
+                <p class="settings-gesture-hint">Pengaturan tersimpan otomatis di perangkat ini.</p>
+            </div>
         </section>
 
         <div class="button-group" aria-label="Navigasi utama">

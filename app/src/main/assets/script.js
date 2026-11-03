@@ -308,6 +308,9 @@ function bukaHome() {
     window.location.reload();
 }
 
+const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+if (closeSettingsBtn) closeSettingsBtn.addEventListener('click', () => { tutupPengaturan(); setBsaNav('home'); });
+
 const navCamera = document.getElementById('navCamera');
 if (navCamera) {
     navCamera.addEventListener('click', () => {
