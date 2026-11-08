@@ -79,8 +79,7 @@ body {
     border-radius: 8px;
 }
 #text:empty:before {
-    content: 'Klik untuk mengetik...';
-    color: rgba(255, 255, 255, 0.5);
+    content: none;
 }
 #logo {
     position: absolute;
