@@ -4,6 +4,24 @@ const background = document.getElementById("background");
 const logo = document.getElementById("logo");
 const originalBsa = document.getElementById("original-bsa");
 const text = document.getElementById("text");
+
+// Hilangkan teks contoh saat area status pertama kali disentuh.
+let teksContohDihapus = false;
+
+text.addEventListener("focus", () => {
+    if (teksContohDihapus) return;
+
+    const teksAwal = (text.innerText || text.textContent || "")
+        .replace(/\s+/g, "")
+        .trim()
+        .toLowerCase();
+
+    if (teksAwal === "ketikanstatus") {
+        text.innerHTML = "";
+    }
+
+    teksContohDihapus = true;
+}, { once: true });
 const saveBtn = document.getElementById("saveBtn");
 const cropModal = document.getElementById("cropModal");
 const cropImage = document.getElementById("cropImage");
